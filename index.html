@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cake & Take - Sales Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .tab-content { display: none; animation: fadeIn 0.25s ease-in; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .tab-btn { transition: all 0.25s ease; }
+    .tab-btn.active { background: linear-gradient(135deg, #fbbf24, #f97316) !important; color: #fff !important; box-shadow: 0 14px 28px rgba(249,115,22,.24); }
+    .glass { background: rgba(255,255,255,.92); backdrop-filter: blur(14px); }
+    .card-hover { transition: transform .2s ease, box-shadow .2s ease; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 18px 35px rgba(15, 23, 42, .12); }
+    .scrollbar-thin::-webkit-scrollbar { height: 8px; width: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 999px; }
+    @media print { .no-print { display:none !important; } body { background:white !important; } .print-card { box-shadow:none !important; border:1px solid #ddd !important; } }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 text-slate-800">
+  <div class="max-w-7xl mx-auto p-4 md:p-6">
+    <header class="glass rounded-[2rem] border border-amber-200 shadow-2xl p-5 md:p-7 mb-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div class="flex items-center gap-4">
+          <img src="data:image/jpeg;base64,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" alt="Cake & Take logo" class="h-20 w-20 md:h-24 md:w-24 rounded-full object-cover shadow-xl ring-4 ring-amber-100 bg-black" />
+          <div>
+            <p class="text-sm font-black tracking-[0.25em] text-orange-500 uppercase">Cake & Take</p>
+            <h1 class="text-3xl md:text-5xl font-black bg-gradient-to-r from-amber-600 via-orange-500 to-rose-500 bg-clip-text text-transparent">Sales Manager</h1>
+            <p class="text-sm md:text-base text-amber-800 font-semibold mt-2">Orders • Kg-based pricing • Profit & expense • Reports • JSON backup/import</p>
+          </div>
+        </div>
+        <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900 max-w-md">
+          <strong>GitHub Pages mode:</strong> data is saved in this browser using localStorage. Use Backup Export + Import to restore data if the browser resets.
+        </div>
+      </div>
+    </header>
+
+    <nav class="glass rounded-[1.75rem] shadow-xl border border-amber-200 mb-6 sticky top-3 z-40 p-2 no-print">
+      <div class="flex flex-nowrap gap-2 overflow-x-auto scrollbar-thin">
+        <button data-tab="dashboard" class="tab-btn active px-5 py-4 rounded-2xl font-black text-slate-700 whitespace-nowrap">🏠 Dashboard</button>
+        <button data-tab="orders" class="tab-btn px-5 py-4 rounded-2xl font-black text-slate-700 hover:bg-amber-50 whitespace-nowrap">🛒 Orders</button>
+        <button data-tab="customers" class="tab-btn px-5 py-4 rounded-2xl font-black text-slate-700 hover:bg-amber-50 whitespace-nowrap">👥 Customers</button>
+        <button data-tab="products" class="tab-btn px-5 py-4 rounded-2xl font-black text-slate-700 hover:bg-amber-50 whitespace-nowrap">🥧 Products</button>
+        <button data-tab="reports" class="tab-btn px-5 py-4 rounded-2xl font-black text-slate-700 hover:bg-amber-50 whitespace-nowrap">📊 Reports</button>
+        <button data-tab="backup" class="tab-btn px-5 py-4 rounded-2xl font-black text-slate-700 hover:bg-amber-50 whitespace-nowrap">⚙️ Backup</button>
+      </div>
+    </nav>
+
+    <section id="dashboard" class="tab-content active">
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4 mb-6">
+        <div class="glass p-5 rounded-3xl shadow-xl border border-blue-100 card-hover">
+          <div class="text-blue-600 font-black">📦 Total Orders</div>
+          <div id="totalOrders" class="text-4xl font-black text-blue-950 mt-3">0</div>
+          <div id="ordersToday" class="text-sm text-blue-600 mt-1">0 today</div>
+        </div>
+        <div class="glass p-5 rounded-3xl shadow-xl border border-green-100 card-hover">
+          <div class="text-green-600 font-black">💰 Revenue</div>
+          <div id="totalRevenue" class="text-4xl font-black text-green-950 mt-3">₹0</div>
+          <div class="text-sm text-green-600 mt-1">all orders</div>
+        </div>
+        <div class="glass p-5 rounded-3xl shadow-xl border border-rose-100 card-hover">
+          <div class="text-rose-600 font-black">🧾 Expense</div>
+          <div id="totalExpense" class="text-4xl font-black text-rose-950 mt-3">₹0</div>
+          <div class="text-sm text-rose-600 mt-1">manual input</div>
+        </div>
+        <div class="glass p-5 rounded-3xl shadow-xl border border-emerald-100 card-hover">
+          <div class="text-emerald-600 font-black">📈 Profit</div>
+          <div id="totalProfit" class="text-4xl font-black text-emerald-950 mt-3">₹0</div>
+          <div class="text-sm text-emerald-600 mt-1">profit - expense</div>
+        </div>
+        <div class="glass p-5 rounded-3xl shadow-xl border border-purple-100 card-hover">
+          <div class="text-purple-600 font-black">👥 Customers</div>
+          <div id="totalCustomers" class="text-4xl font-black text-purple-950 mt-3">0</div>
+          <div class="text-sm text-purple-600 mt-1">unique customers</div>
+        </div>
+        <div class="glass p-5 rounded-3xl shadow-xl border border-orange-100 card-hover">
+          <div class="text-orange-600 font-black">⚖️ Kg Sold</div>
+          <div id="totalKg" class="text-4xl font-black text-orange-950 mt-3">0</div>
+          <div class="text-sm text-orange-600 mt-1">total weight</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+        <div class="xl:col-span-2 glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
+          <div class="flex items-center justify-between gap-3 mb-5">
+            <h2 class="text-2xl font-black">📈 Sales Growth</h2>
+            <span class="text-xs font-bold px-3 py-2 bg-blue-50 text-blue-700 rounded-full">Last 30 days</span>
+          </div>
+          <canvas id="salesGrowthChart" height="120"></canvas>
+        </div>
+        <div class="glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
+          <h2 class="text-2xl font-black mb-5">💳 Payments</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center p-4 rounded-2xl bg-green-50 border border-green-100">
+              <span class="font-bold">✅ Paid</span><span id="paidCount" class="text-3xl font-black text-green-700">0</span>
+            </div>
+            <div class="flex justify-between items-center p-4 rounded-2xl bg-yellow-50 border border-yellow-100">
+              <span class="font-bold">⏳ Pending</span><span id="pendingCount" class="text-3xl font-black text-yellow-700">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+        <div class="glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
+          <h2 class="text-2xl font-black mb-5">📊 Profit vs Expense</h2>
+          <canvas id="profitExpenseChart" height="145"></canvas>
+        </div>
+        <div class="glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
+          <h2 class="text-2xl font-black mb-5">🗓️ Historical Monthly Data</h2>
+          <canvas id="historyChart" height="145"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+        <div class="xl:col-span-2 glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
+          <h2 class="text-2xl font-black mb-5">🥧 Top Products</h2>
+          <div id="topProducts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+        <div class="glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
+          <h2 class="text-2xl font-black mb-5">⚖️ Product Kg Share</h2>
+          <div id="productMixEmpty" class="hidden text-center text-slate-500 py-16">No product sales yet.</div>
+          <canvas id="productMixChart" height="190"></canvas>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass p-6 rounded-3xl shadow-xl border border-amber-100 print-card">
+          <h2 class="text-2xl font-black mb-4">📅 This Month Report</h2>
+          <div id="monthSummary" class="grid grid-cols-2 gap-3"></div>
+        </div>
+        <div class="glass p-6 rounded-3xl shadow-xl border border-orange-100 print-card">
+          <h2 class="text-2xl font-black mb-4">🗓️ This Year Report</h2>
+          <div id="yearSummary" class="grid grid-cols-2 gap-3"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="orders" class="tab-content">
+      <div class="glass p-5 md:p-8 rounded-3xl shadow-xl mb-6 border border-slate-200 print-card">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-7">
+          <h2 id="orderFormTitle" class="text-3xl font-black">➕ New Order</h2>
+          <button id="cancelOrderEdit" type="button" class="hidden no-print px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 font-black">Cancel Edit</button>
+        </div>
+        <form id="orderForm" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">👤 Customer Name *</label>
+            <input id="customerName" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" placeholder="Customer name" />
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">📱 Phone *</label>
+            <input id="customerPhone" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" placeholder="9876543210" />
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">🥧 Product *</label>
+            <select id="orderProduct" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg">
+              <option value="">Add product first...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">🧮 Quantity / Count *</label>
+            <input id="orderKg" type="number" min="1" step="1" value="1" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" />
+            <p class="mt-2 text-xs font-bold text-slate-500">Example: 1 means one selected item/pack. Kg and price come from the product.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">🧾 Expense ₹</label>
+            <input id="orderExpense" type="number" min="0" step="1" value="0" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-rose-200 focus:border-rose-400 text-lg" placeholder="0" />
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">📈 Profit ₹</label>
+            <input id="orderProfit" type="number" step="1" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="Enter profit manually" />
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">💳 Payment Status</label>
+            <select id="paymentStatus" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg">
+              <option value="pending">⏳ Pending</option>
+              <option value="paid">✅ Paid</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">📅 Order Date</label>
+            <input id="orderDate" type="datetime-local" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" />
+          </div>
+          <div id="orderPreview" class="hidden"></div>
+          <div class="xl:col-span-3">
+            <button id="orderSubmitButton" type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-5 px-8 rounded-2xl text-xl font-black shadow-xl hover:from-amber-600 hover:to-orange-700 transition-all">➕ Create Order Now</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="glass p-5 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <h2 class="text-3xl font-black">📋 All Orders</h2>
+          <input id="orderSearch" class="w-full md:w-80 p-3 border-2 border-slate-200 rounded-2xl no-print" placeholder="Search name, phone, product..." />
+        </div>
+        <div id="ordersList" class="space-y-4"></div>
+      </div>
+    </section>
+
+    <section id="products" class="tab-content">
+      <div class="glass p-5 md:p-8 rounded-3xl shadow-xl mb-6 border border-slate-200 print-card">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-7">
+          <h2 id="productFormTitle" class="text-3xl font-black">➕ Add Product</h2>
+          <button id="cancelProductEdit" type="button" class="hidden no-print px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 font-black">Cancel Edit</button>
+        </div>
+        <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">🥧 Main Product *</label>
+            <input id="newProductName" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="Brownie" />
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">🍫 Sub Category</label>
+            <input id="newProductSubCategory" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="Walnut, Choco Chip, etc." />
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">⚖️ Product Kg *</label>
+            <input id="newProductKg" type="number" min="0.1" step="0.05" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="0.5" />
+            <p class="mt-2 text-xs font-bold text-slate-500">Example: 0.5, 1, 1.5, 2</p>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">💰 Price for this Kg ₹ *</label>
+            <input id="newProductPrice" type="number" min="1" step="1" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="299" />
+            <p class="mt-2 text-xs font-bold text-slate-500">Orders use this exact price. No auto per-kg calculation.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">📝 Notes</label>
+            <input id="newProductNotes" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="Fresh cream, eggless, etc." />
+          </div>
+          <div class="md:col-span-2 xl:col-span-5">
+            <button id="productSubmitButton" type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 px-8 rounded-2xl text-xl font-black shadow-xl hover:from-emerald-600 hover:to-teal-700 transition-all">➕ Add Product</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="glass p-5 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+          <h2 class="text-3xl font-black">🥧 Product Inventory</h2>
+          <p class="text-sm font-bold text-slate-500">No stock tracking. Add each product with main product, sub category, kg size, and exact price.</p>
+        </div>
+        <div id="productsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+      </div>
+    </section>
+
+    <section id="customers" class="tab-content">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass p-5 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+          <h2 class="text-3xl font-black mb-6">➕ Add Customer</h2>
+          <form id="customerForm" class="space-y-5">
+            <div>
+              <label class="block text-sm font-black text-slate-700 mb-2">👤 Name</label>
+              <input id="customerNameNew" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-400 text-lg" placeholder="Customer name" />
+            </div>
+            <div>
+              <label class="block text-sm font-black text-slate-700 mb-2">📱 Phone</label>
+              <input id="customerPhoneNew" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-400 text-lg" placeholder="Phone number" />
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-4 px-8 rounded-2xl text-xl font-black shadow-xl hover:from-indigo-600 hover:to-purple-700 transition-all">➕ Add Customer</button>
+          </form>
+        </div>
+        <div class="glass p-5 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+          <h2 class="text-3xl font-black mb-6">👥 Customers List</h2>
+          <div id="customersList" class="space-y-4 max-h-[36rem] overflow-y-auto scrollbar-thin pr-1"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reports" class="tab-content">
+      <div class="glass p-5 md:p-8 rounded-3xl shadow-xl border border-slate-200 mb-6 print-card">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-3xl font-black">📊 Monthly Report</h2>
+            <p class="text-slate-500 font-semibold mt-1">Revenue, expense, profit, orders, and kg sold grouped month-wise.</p>
+          </div>
+          <button onclick="window.print()" class="no-print px-5 py-3 rounded-2xl bg-slate-900 text-white font-black hover:bg-slate-700">🖨️ Print / Save PDF</button>
+        </div>
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full text-left min-w-[760px]">
+            <thead class="bg-amber-50 text-amber-900">
+              <tr>
+                <th class="p-4 rounded-l-2xl">Month</th><th class="p-4">Orders</th><th class="p-4">Kg Sold</th><th class="p-4">Revenue</th><th class="p-4">Expense</th><th class="p-4 rounded-r-2xl">Profit</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyReportBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="glass p-5 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+        <h2 class="text-3xl font-black mb-6">🗓️ Yearly Report</h2>
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full text-left min-w-[760px]">
+            <thead class="bg-orange-50 text-orange-900">
+              <tr>
+                <th class="p-4 rounded-l-2xl">Year</th><th class="p-4">Orders</th><th class="p-4">Kg Sold</th><th class="p-4">Revenue</th><th class="p-4">Expense</th><th class="p-4 rounded-r-2xl">Profit</th>
+              </tr>
+            </thead>
+            <tbody id="yearlyReportBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="backup" class="tab-content">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass p-6 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+          <h2 class="text-3xl font-black mb-4">💾 Export Backup</h2>
+          <p class="text-slate-600 font-semibold mb-6">Download your products, orders, customers, profit, expenses, and report data as one JSON file.</p>
+          <button id="downloadBackupBtn" class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-5 rounded-2xl text-xl font-black shadow-xl hover:from-blue-600 hover:to-indigo-700">Download JSON Backup</button>
+          <div class="mt-5 rounded-2xl bg-blue-50 border border-blue-100 p-4 text-blue-900 text-sm">
+            Keep this file safe. You can import it later if browser data is deleted.
+          </div>
+        </div>
+        <div class="glass p-6 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+          <h2 class="text-3xl font-black mb-4">📥 Import / Restore</h2>
+          <p class="text-slate-600 font-semibold mb-6">Restore data from a previous JSON backup. This also supports your older backup format.</p>
+          <input id="backupFile" type="file" accept="application/json,.json" class="w-full p-4 border-2 border-dashed border-slate-300 rounded-2xl bg-white mb-4" />
+          <button id="importBackupBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 rounded-2xl text-xl font-black shadow-xl hover:from-emerald-600 hover:to-teal-700">Import Backup</button>
+          <button id="clearDataBtn" class="w-full mt-4 bg-white border-2 border-red-200 text-red-600 py-4 rounded-2xl text-lg font-black hover:bg-red-50">Reset All Data</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="hidden fixed top-5 right-5 max-w-sm z-50 rounded-2xl px-5 py-4 shadow-2xl text-white font-black no-print"></div>
+
+<script>
+const STORAGE_KEY = 'cake_take_manager_v2';
+
+class CakeTakeManager {
+  constructor() {
+    this.state = { products: [], orders: [], customers: [] };
+    this.editingProductId = null;
+    this.editingOrderId = null;
+    this.charts = {};
+    this.init();
+  }
+
+  init() {
+    this.loadData();
+    this.bindEvents();
+    this.setDefaultOrderDate();
+    this.renderAll();
+    setInterval(() => this.saveData(false), 30000);
+  }
+
+  bindEvents() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => this.showTab(btn.dataset.tab));
+    });
+
+    document.getElementById('productForm').addEventListener('submit', e => {
+      e.preventDefault();
+      this.addOrUpdateProduct();
+    });
+    document.getElementById('cancelProductEdit').addEventListener('click', () => this.resetProductForm());
+
+    document.getElementById('orderForm').addEventListener('submit', e => {
+      e.preventDefault();
+      this.addOrUpdateOrder();
+    });
+    document.getElementById('cancelOrderEdit').addEventListener('click', () => this.resetOrderForm());
+    ['orderProduct', 'orderKg', 'orderExpense', 'orderProfit'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => this.updateOrderPreview());
+      document.getElementById(id).addEventListener('change', () => this.updateOrderPreview());
+    });
+    document.querySelectorAll('.kg-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('orderKg').value = btn.dataset.kg;
+        this.updateOrderPreview();
+      });
+    });
+    document.getElementById('orderSearch').addEventListener('input', () => this.renderOrders());
+
+    document.getElementById('customerForm').addEventListener('submit', e => {
+      e.preventDefault();
+      this.addCustomer();
+    });
+
+    document.getElementById('downloadBackupBtn').addEventListener('click', () => this.downloadBackup());
+    document.getElementById('importBackupBtn').addEventListener('click', () => this.importBackup());
+    document.getElementById('clearDataBtn').addEventListener('click', () => this.clearData());
+  }
+
+  showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    this.renderAll();
+  }
+
+  loadData() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return;
+      const data = JSON.parse(saved);
+      this.state = this.migrateData(data);
+    } catch (error) {
+      console.error(error);
+      this.notify('Saved data could not be loaded.', 'error');
+    }
+  }
+
+  saveData(showToast = true) {
+    const payload = {
+      version: 3,
+      savedAt: new Date().toISOString(),
+      products: this.state.products,
+      orders: this.state.orders,
+      customers: this.state.customers
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    if (showToast) this.notify('Data saved successfully ✅');
+  }
+
+  migrateData(data) {
+    const rawProducts = Array.isArray(data.products) ? data.products : [];
+    const products = rawProducts.map(p => {
+      const baseKg = Number(p.baseKg ?? p.manualKg ?? p.kg ?? 1) || 1;
+      const basePrice = Number(p.basePrice ?? p.priceForKg ?? p.price ?? ((Number(p.pricePerKg) || 0) * baseKg)) || 0;
+      const mainProduct = String(p.mainProduct || p.category || p.mainCategory || p.name || 'Unnamed Product').trim();
+      const subCategory = String(p.subCategory || p.variant || '').trim();
+      const name = [mainProduct, subCategory].filter(Boolean).join(' - ');
+      return {
+        id: Number(p.id) || Date.now() + Math.random(),
+        mainProduct,
+        subCategory,
+        name,
+        baseKg,
+        basePrice,
+        notes: String(p.notes || '')
+      };
+    }).filter(p => p.name && p.baseKg > 0 && p.basePrice > 0);
+
+    const productById = new Map(products.map(p => [String(p.id), p]));
+    const rawOrders = Array.isArray(data.orders) ? data.orders : [];
+    const orders = rawOrders.map(o => {
+      const product = productById.get(String(o.productId));
+      const hasStoredQuantity = o.quantity !== undefined || o.count !== undefined || o.qty !== undefined;
+      const quantity = Number(o.quantity ?? o.count ?? o.qty ?? o.kg ?? 1) || 1;
+      const productBaseKg = Number(o.productBaseKg ?? product?.baseKg ?? 1) || 1;
+      const productBasePrice = Number(o.productBasePrice ?? o.unitPrice ?? product?.basePrice ?? o.basePrice ?? 0) || 0;
+      const kg = hasStoredQuantity ? (Number(o.kg ?? (productBaseKg * quantity)) || productBaseKg * quantity) : productBaseKg * quantity;
+      const unitPrice = productBasePrice || Number(o.pricePerKg ?? 0) || 0;
+      const total = hasStoredQuantity && o.total !== undefined ? (Number(o.total) || 0) : Math.round(unitPrice * quantity);
+      const expense = Number(o.expense ?? 0) || 0;
+      const profit = Number(o.profit ?? (total - expense)) || 0;
+      return {
+        id: Number(o.id) || Date.now() + Math.random(),
+        customerName: String(o.customerName || o.name || 'Walk-in Customer').trim(),
+        customerPhone: String(o.customerPhone || o.phone || '').trim(),
+        productId: Number(o.productId) || null,
+        productName: String(o.productName || product?.name || 'Unknown Product').trim(),
+        productBaseKg,
+        productBasePrice: unitPrice,
+        quantity,
+        kg,
+        unitPrice,
+        total,
+        expense,
+        profit,
+        paymentStatus: o.paymentStatus === 'paid' ? 'paid' : 'pending',
+        date: o.date || new Date().toISOString(),
+        updatedAt: o.updatedAt || null
+      };
+    });
+
+    const customers = Array.isArray(data.customers) ? data.customers.map(c => ({
+      id: Number(c.id) || Date.now() + Math.random(),
+      name: String(c.name || '').trim(),
+      phone: String(c.phone || '').trim()
+    })).filter(c => c.name || c.phone) : [];
+
+    return { products, orders, customers };
+  }
+
+  formatCurrency(value) {
+    return '₹' + (Number(value) || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  formatKg(value) {
+    return `${Number(value || 0).toFixed(2).replace(/\.00$/, '')} kg`;
+  }
+
+  formatDate(value) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '-';
+    return d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  monthKey(value) {
+    const d = new Date(value);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  setDefaultOrderDate() {
+    const input = document.getElementById('orderDate');
+    if (!input.value) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      input.value = now.toISOString().slice(0, 16);
+    }
+  }
+
+  renderAll() {
+    this.updateProductDropdown();
+    this.renderProducts();
+    this.renderOrders();
+    this.renderCustomers();
+    this.renderDashboard();
+    this.renderReports();
+    this.updateOrderPreview();
+  }
+
+  addOrUpdateProduct() {
+    const mainProduct = document.getElementById('newProductName').value.trim();
+    const subCategory = document.getElementById('newProductSubCategory').value.trim();
+    const baseKg = Number(document.getElementById('newProductKg').value);
+    const basePrice = Number(document.getElementById('newProductPrice').value);
+    const notes = document.getElementById('newProductNotes').value.trim();
+    if (!mainProduct || !baseKg || baseKg <= 0 || !basePrice || basePrice <= 0) {
+      this.notify('Please enter main product, kg, and valid price.', 'error');
+      return;
+    }
+    const name = [mainProduct, subCategory].filter(Boolean).join(' - ');
+
+    if (this.editingProductId) {
+      const product = this.state.products.find(p => p.id === this.editingProductId);
+      if (product) {
+        product.mainProduct = mainProduct;
+        product.subCategory = subCategory;
+        product.name = name;
+        product.baseKg = baseKg;
+        product.basePrice = basePrice;
+        product.notes = notes;
+        delete product.pricePerKg;
+      }
+      this.notify('Product updated ✅');
+    } else {
+      this.state.products.push({ id: Date.now(), mainProduct, subCategory, name, baseKg, basePrice, notes });
+      this.notify('Product added ✅');
+    }
+
+    this.resetProductForm();
+    this.saveData(false);
+    this.renderAll();
+  }
+
+  editProduct(id) {
+    const product = this.state.products.find(p => p.id === id);
+    if (!product) return;
+    this.editingProductId = id;
+    document.getElementById('newProductName').value = product.mainProduct || product.name;
+    document.getElementById('newProductSubCategory').value = product.subCategory || '';
+    document.getElementById('newProductKg').value = product.baseKg || 1;
+    document.getElementById('newProductPrice').value = product.basePrice || product.pricePerKg || '';
+    document.getElementById('newProductNotes').value = product.notes || '';
+    document.getElementById('productFormTitle').textContent = '✏️ Edit Product';
+    document.getElementById('productSubmitButton').textContent = '💾 Save Product Changes';
+    document.getElementById('cancelProductEdit').classList.remove('hidden');
+    document.getElementById('products').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  resetProductForm() {
+    this.editingProductId = null;
+    document.getElementById('productForm').reset();
+    document.getElementById('productFormTitle').textContent = '➕ Add Product';
+    document.getElementById('productSubmitButton').textContent = '➕ Add Product';
+    document.getElementById('cancelProductEdit').classList.add('hidden');
+  }
+
+  deleteProduct(id) {
+    const product = this.state.products.find(p => p.id === id);
+    const soldCount = this.state.orders.filter(o => o.productId === id).length;
+    const message = soldCount > 0
+      ? `Delete ${product?.name || 'this product'}? Existing orders will stay in history.`
+      : `Delete ${product?.name || 'this product'}?`;
+    if (!confirm(message)) return;
+    this.state.products = this.state.products.filter(p => p.id !== id);
+    this.saveData(false);
+    this.renderAll();
+    this.notify('Product deleted.');
+  }
+
+  productStats(productId) {
+    const orders = this.state.orders.filter(o => o.productId === productId || String(o.productId) === String(productId));
+    return {
+      orders: orders.length,
+      kg: orders.reduce((s, o) => s + Number(o.kg || 0), 0),
+      revenue: orders.reduce((s, o) => s + Number(o.total || 0), 0),
+      profit: orders.reduce((s, o) => s + Number(o.profit || 0), 0)
+    };
+  }
+
+  renderProducts() {
+    const container = document.getElementById('productsList');
+    if (!this.state.products.length) {
+      container.innerHTML = this.emptyState('No products yet', 'Add your first main product, sub category, kg size, and exact price. Stock is removed as requested.');
+      return;
+    }
+    container.innerHTML = this.state.products.map(product => {
+      const stats = this.productStats(product.id);
+      const mainProduct = product.mainProduct || product.name;
+      const subCategory = product.subCategory || 'General';
+      return `
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-3xl shadow-lg border border-emerald-200 card-hover">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <div class="text-xs font-black text-emerald-700 uppercase tracking-wide">${this.escape(mainProduct)}</div>
+              <div class="font-black text-xl text-slate-900 mt-1">${this.escape(subCategory)}</div>
+              <div class="text-sm text-slate-500 mt-1">${this.escape(product.notes || 'Sold by selected kg size')}</div>
+            </div>
+            <div class="text-3xl">🥧</div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="rounded-2xl bg-white/80 p-3 border border-emerald-100"><div class="text-xs font-bold text-slate-500">Kg Size</div><div class="text-xl font-black text-emerald-700">${this.formatKg(product.baseKg || 1)}</div></div>
+            <div class="rounded-2xl bg-white/80 p-3 border border-emerald-100"><div class="text-xs font-bold text-slate-500">Exact Price</div><div class="text-xl font-black text-emerald-700">${this.formatCurrency(product.basePrice || 0)}</div></div>
+            <div class="rounded-2xl bg-white/80 p-3 border border-emerald-100"><div class="text-xs font-bold text-slate-500">Sold Kg</div><div class="text-lg font-black text-emerald-700">${this.formatKg(stats.kg)}</div></div>
+            <div class="rounded-2xl bg-white/80 p-3 border border-emerald-100"><div class="text-xs font-bold text-slate-500">Orders</div><div class="text-lg font-black text-emerald-700">${stats.orders}</div></div>
+            <div class="rounded-2xl bg-white/80 p-3 border border-emerald-100"><div class="text-xs font-bold text-slate-500">Revenue</div><div class="text-lg font-black text-emerald-700">${this.formatCurrency(stats.revenue)}</div></div>
+            <div class="rounded-2xl bg-white/80 p-3 border border-emerald-100"><div class="text-xs font-bold text-slate-500">Profit</div><div class="text-lg font-black text-emerald-700">${this.formatCurrency(stats.profit)}</div></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 no-print">
+            <button onclick="app.editProduct(${product.id})" class="py-3 rounded-2xl bg-amber-500 text-white font-black hover:bg-amber-600">✏️ Edit</button>
+            <button onclick="app.deleteProduct(${product.id})" class="py-3 rounded-2xl bg-red-500 text-white font-black hover:bg-red-600">🗑️ Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  updateProductDropdown() {
+    const select = document.getElementById('orderProduct');
+    if (!this.state.products.length) {
+      select.innerHTML = '<option value="">Add product first...</option>';
+      return;
+    }
+    select.innerHTML = '<option value="">Select Product</option>' + this.state.products
+      .map(p => `<option value="${p.id}">${this.escape(p.name)} - ${this.formatKg(p.baseKg || 1)} = ${this.formatCurrency(p.basePrice || 0)}</option>`)
+      .join('');
+  }
+
+  addOrUpdateOrder() {
+    const customerName = document.getElementById('customerName').value.trim();
+    const customerPhone = document.getElementById('customerPhone').value.trim();
+    const productId = Number(document.getElementById('orderProduct').value);
+    const quantity = Number(document.getElementById('orderKg').value);
+    const paymentStatus = document.getElementById('paymentStatus').value;
+    const expense = Number(document.getElementById('orderExpense').value || 0);
+    const profitInput = document.getElementById('orderProfit').value;
+    const product = this.state.products.find(p => p.id === productId);
+
+    if (!customerName || !customerPhone || !product || !quantity || quantity <= 0) {
+      this.notify('Please fill customer, product, and valid quantity/count.', 'error');
+      return;
+    }
+
+    const productBaseKg = Number(product.baseKg || 1);
+    const productBasePrice = Number(product.basePrice || 0);
+    const kg = Number((productBaseKg * quantity).toFixed(3));
+    const total = Math.round(productBasePrice * quantity);
+    const profit = profitInput === '' ? total - expense : Number(profitInput);
+    const localDate = document.getElementById('orderDate').value;
+    const date = localDate ? new Date(localDate).toISOString() : new Date().toISOString();
+
+    const orderPayload = {
+      customerName,
+      customerPhone,
+      productId,
+      productName: product.name,
+      productBaseKg,
+      productBasePrice,
+      quantity,
+      kg,
+      unitPrice: productBasePrice,
+      total,
+      expense,
+      profit: Number.isFinite(profit) ? profit : total - expense,
+      paymentStatus,
+      date,
+      updatedAt: new Date().toISOString()
+    };
+
+    if (this.editingOrderId) {
+      const idx = this.state.orders.findIndex(o => o.id === this.editingOrderId);
+      if (idx >= 0) this.state.orders[idx] = { ...this.state.orders[idx], ...orderPayload };
+      this.notify('Order updated ✅');
+    } else {
+      this.state.orders.unshift({ id: Date.now(), ...orderPayload });
+      this.notify('Order added ✅');
+    }
+
+    this.upsertCustomer(customerName, customerPhone);
+    this.resetOrderForm();
+    this.saveData(false);
+    this.renderAll();
+  }
+
+  editOrder(id) {
+    const order = this.state.orders.find(o => o.id === id);
+    if (!order) return;
+    this.editingOrderId = id;
+    this.showTab('orders');
+    document.getElementById('customerName').value = order.customerName;
+    document.getElementById('customerPhone').value = order.customerPhone;
+    document.getElementById('orderProduct').value = order.productId || '';
+    document.getElementById('orderKg').value = order.quantity || 1;
+    document.getElementById('orderExpense').value = order.expense || 0;
+    document.getElementById('orderProfit').value = order.profit || '';
+    document.getElementById('paymentStatus').value = order.paymentStatus;
+    const d = new Date(order.date);
+    if (!Number.isNaN(d.getTime())) {
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      document.getElementById('orderDate').value = d.toISOString().slice(0, 16);
+    }
+    document.getElementById('orderFormTitle').textContent = '✏️ Edit Order';
+    document.getElementById('orderSubmitButton').textContent = '💾 Save Order Changes';
+    document.getElementById('cancelOrderEdit').classList.remove('hidden');
+    this.updateOrderPreview();
+    document.getElementById('orders').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  resetOrderForm() {
+    this.editingOrderId = null;
+    document.getElementById('orderForm').reset();
+    document.getElementById('orderKg').value = 1;
+    document.getElementById('orderExpense').value = 0;
+    document.getElementById('orderFormTitle').textContent = '➕ New Order';
+    document.getElementById('orderSubmitButton').textContent = '➕ Create Order Now';
+    document.getElementById('cancelOrderEdit').classList.add('hidden');
+    this.setDefaultOrderDate();
+    this.updateOrderPreview();
+  }
+
+  deleteOrder(id) {
+    if (!confirm('Delete this order? Dashboard charts will update automatically.')) return;
+    this.state.orders = this.state.orders.filter(o => o.id !== id);
+    this.saveData(false);
+    this.renderAll();
+    this.notify('Order deleted.');
+  }
+
+  updateOrderPreview() {
+    const box = document.getElementById('orderPreview');
+    if (box) box.innerHTML = '';
+  }
+
+  renderOrders() {
+    const container = document.getElementById('ordersList');
+    const q = document.getElementById('orderSearch')?.value?.trim().toLowerCase() || '';
+    const orders = this.state.orders.filter(o => !q || [o.customerName, o.customerPhone, o.productName, o.paymentStatus].join(' ').toLowerCase().includes(q));
+    if (!orders.length) {
+      container.innerHTML = this.emptyState('No orders yet', this.state.products.length ? 'Create your first order above.' : 'Add products first, then create orders.');
+      return;
+    }
+    container.innerHTML = orders.map(order => `
+      <div class="rounded-3xl border border-slate-200 bg-white/80 shadow-lg p-5 card-hover">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="text-xl font-black text-slate-900">${this.escape(order.customerName)}</span>
+              <span class="px-3 py-1 rounded-full text-xs font-black ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${order.paymentStatus === 'paid' ? '✅ Paid' : '⏳ Pending'}</span>
+            </div>
+            <div class="text-sm text-slate-500 font-semibold">📱 ${this.escape(order.customerPhone)} • 📅 ${this.formatDate(order.date)}</div>
+            <div class="text-sm text-slate-600 font-semibold mt-1">🥧 ${this.escape(order.productName)} • ${this.formatKg(order.productBaseKg || 1)} × ${order.quantity || 1} = ${this.formatKg(order.kg)} • Price ${this.formatCurrency(order.unitPrice || order.productBasePrice || 0)}</div>
+          </div>
+          <div class="grid grid-cols-3 gap-3 text-center min-w-[280px]">
+            <div class="rounded-2xl bg-amber-50 p-3"><div class="text-xs font-bold text-slate-500">Total</div><div class="font-black text-amber-700">${this.formatCurrency(order.total)}</div></div>
+            <div class="rounded-2xl bg-rose-50 p-3"><div class="text-xs font-bold text-slate-500">Expense</div><div class="font-black text-rose-700">${this.formatCurrency(order.expense)}</div></div>
+            <div class="rounded-2xl bg-emerald-50 p-3"><div class="text-xs font-bold text-slate-500">Profit</div><div class="font-black text-emerald-700">${this.formatCurrency(order.profit)}</div></div>
+          </div>
+          <div class="flex gap-2 no-print">
+            <button onclick="app.editOrder(${order.id})" class="px-4 py-3 rounded-2xl bg-amber-500 text-white font-black hover:bg-amber-600">✏️ Edit</button>
+            <button onclick="app.deleteOrder(${order.id})" class="px-4 py-3 rounded-2xl bg-red-500 text-white font-black hover:bg-red-600">🗑️</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  addCustomer() {
+    const name = document.getElementById('customerNameNew').value.trim();
+    const phone = document.getElementById('customerPhoneNew').value.trim();
+    if (!name && !phone) {
+      this.notify('Enter customer name or phone.', 'error');
+      return;
+    }
+    this.upsertCustomer(name || 'Customer', phone);
+    document.getElementById('customerForm').reset();
+    this.saveData(false);
+    this.renderAll();
+    this.notify('Customer saved ✅');
+  }
+
+  upsertCustomer(name, phone) {
+    const existing = this.state.customers.find(c => (phone && c.phone === phone) || (!phone && c.name.toLowerCase() === name.toLowerCase()));
+    if (existing) {
+      existing.name = name || existing.name;
+      existing.phone = phone || existing.phone;
+    } else {
+      this.state.customers.push({ id: Date.now() + Math.random(), name, phone });
+    }
+  }
+
+  customerSummaries() {
+    const map = new Map();
+    this.state.customers.forEach(c => {
+      const key = c.phone || c.name.toLowerCase();
+      if (!map.has(key)) map.set(key, { name: c.name || 'Customer', phone: c.phone || '', orders: 0, kg: 0, spent: 0, profit: 0 });
+    });
+    this.state.orders.forEach(o => {
+      const key = o.customerPhone || o.customerName.toLowerCase();
+      if (!map.has(key)) map.set(key, { name: o.customerName, phone: o.customerPhone, orders: 0, kg: 0, spent: 0, profit: 0 });
+      const c = map.get(key);
+      c.name = o.customerName || c.name;
+      c.phone = o.customerPhone || c.phone;
+      c.orders += 1;
+      c.kg += Number(o.kg || 0);
+      c.spent += Number(o.total || 0);
+      c.profit += Number(o.profit || 0);
+    });
+    return Array.from(map.values()).sort((a, b) => b.spent - a.spent);
+  }
+
+  renderCustomers() {
+    const container = document.getElementById('customersList');
+    const customers = this.customerSummaries();
+    if (!customers.length) {
+      container.innerHTML = this.emptyState('No customers yet', 'Customers will appear when you add them or create orders.');
+      return;
+    }
+    container.innerHTML = customers.map(c => `
+      <div class="p-5 rounded-3xl bg-white/80 border border-indigo-100 shadow-lg">
+        <div class="font-black text-xl text-slate-900">${this.escape(c.name)}</div>
+        <div class="text-slate-500 font-semibold mt-1">📱 ${this.escape(c.phone || '-')}</div>
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <div class="rounded-2xl bg-indigo-50 p-3"><div class="text-xs font-bold text-slate-500">Orders</div><div class="font-black text-indigo-700">${c.orders}</div></div>
+          <div class="rounded-2xl bg-indigo-50 p-3"><div class="text-xs font-bold text-slate-500">Kg</div><div class="font-black text-indigo-700">${this.formatKg(c.kg)}</div></div>
+          <div class="rounded-2xl bg-green-50 p-3"><div class="text-xs font-bold text-slate-500">Spent</div><div class="font-black text-green-700">${this.formatCurrency(c.spent)}</div></div>
+          <div class="rounded-2xl bg-emerald-50 p-3"><div class="text-xs font-bold text-slate-500">Profit</div><div class="font-black text-emerald-700">${this.formatCurrency(c.profit)}</div></div>
+        </div>
+      </div>`).join('');
+  }
+
+  renderDashboard() {
+    const orders = this.state.orders;
+    const totalRevenue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+    const totalExpense = orders.reduce((s, o) => s + Number(o.expense || 0), 0);
+    const totalProfit = orders.reduce((s, o) => s + Number(o.profit || 0), 0);
+    const totalKg = orders.reduce((s, o) => s + Number(o.kg || 0), 0);
+    const today = new Date().toDateString();
+    const ordersToday = orders.filter(o => new Date(o.date).toDateString() === today).length;
+    document.getElementById('totalOrders').textContent = orders.length;
+    document.getElementById('ordersToday').textContent = `${ordersToday} today`;
+    document.getElementById('totalRevenue').textContent = this.formatCurrency(totalRevenue);
+    document.getElementById('totalExpense').textContent = this.formatCurrency(totalExpense);
+    document.getElementById('totalProfit').textContent = this.formatCurrency(totalProfit);
+    document.getElementById('totalCustomers').textContent = this.customerSummaries().length;
+    document.getElementById('totalKg').textContent = this.formatKg(totalKg).replace(' kg', '');
+    document.getElementById('paidCount').textContent = orders.filter(o => o.paymentStatus === 'paid').length;
+    document.getElementById('pendingCount').textContent = orders.filter(o => o.paymentStatus !== 'paid').length;
+    this.renderTopProducts();
+    this.renderSummaryCards();
+    this.renderCharts();
+  }
+
+  renderTopProducts() {
+    const container = document.getElementById('topProducts');
+    const map = new Map();
+    this.state.orders.forEach(o => {
+      const key = o.productName || `Product ${o.productId}`;
+      if (!map.has(key)) map.set(key, { name: key, kg: 0, revenue: 0, profit: 0, orders: 0 });
+      const item = map.get(key);
+      item.kg += Number(o.kg || 0);
+      item.revenue += Number(o.total || 0);
+      item.profit += Number(o.profit || 0);
+      item.orders += 1;
+    });
+    const top = Array.from(map.values()).sort((a, b) => b.kg - a.kg).slice(0, 6);
+    if (!top.length) {
+      container.innerHTML = this.emptyState('No top products yet', 'Top products will show only after product sales are recorded.');
+      return;
+    }
+    container.innerHTML = top.map((p, index) => `
+      <div class="p-5 bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl shadow-lg border border-purple-100 text-center">
+        <div class="text-3xl mb-2">${index === 0 ? '🏆' : '🥧'}</div>
+        <div class="font-black text-lg mb-2">${this.escape(p.name)}</div>
+        <div class="text-2xl font-black text-purple-700">${this.formatKg(p.kg)}</div>
+        <div class="text-sm font-bold text-slate-500 mt-1">${p.orders} orders • ${this.formatCurrency(p.revenue)}</div>
+      </div>`).join('');
+  }
+
+  renderSummaryCards() {
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const currentYear = String(now.getFullYear());
+    const monthOrders = this.state.orders.filter(o => this.monthKey(o.date) === currentMonth);
+    const yearOrders = this.state.orders.filter(o => String(new Date(o.date).getFullYear()) === currentYear);
+    document.getElementById('monthSummary').innerHTML = this.summaryHtml(monthOrders);
+    document.getElementById('yearSummary').innerHTML = this.summaryHtml(yearOrders);
+  }
+
+  summaryHtml(orders) {
+    const revenue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+    const expense = orders.reduce((s, o) => s + Number(o.expense || 0), 0);
+    const profit = orders.reduce((s, o) => s + Number(o.profit || 0), 0);
+    const kg = orders.reduce((s, o) => s + Number(o.kg || 0), 0);
+    return `
+      <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Orders</div><div class="text-2xl font-black">${orders.length}</div></div>
+      <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Kg</div><div class="text-2xl font-black">${this.formatKg(kg)}</div></div>
+      <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Revenue</div><div class="text-2xl font-black text-green-700">${this.formatCurrency(revenue)}</div></div>
+      <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Profit</div><div class="text-2xl font-black text-emerald-700">${this.formatCurrency(profit)}</div></div>`;
+  }
+
+  renderCharts() {
+    if (typeof Chart === 'undefined') return;
+    Object.values(this.charts).forEach(chart => chart.destroy());
+    this.charts = {};
+
+    const daySeries = this.getLastDays(30);
+    this.charts.sales = new Chart(document.getElementById('salesGrowthChart'), {
+      type: 'line',
+      data: { labels: daySeries.labels, datasets: [{ label: 'Revenue ₹', data: daySeries.revenue, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,.12)', tension: .35, fill: true, pointRadius: 2 }] },
+      options: this.chartOptions('Revenue')
+    });
+
+    this.charts.profit = new Chart(document.getElementById('profitExpenseChart'), {
+      type: 'bar',
+      data: { labels: daySeries.labels, datasets: [
+        { label: 'Profit ₹', data: daySeries.profit, backgroundColor: 'rgba(16,185,129,.65)' },
+        { label: 'Expense ₹', data: daySeries.expense, backgroundColor: 'rgba(244,63,94,.55)' }
+      ] },
+      options: this.chartOptions('Amount')
+    });
+
+    const monthSeries = this.getLastMonths(12);
+    this.charts.history = new Chart(document.getElementById('historyChart'), {
+      type: 'line',
+      data: { labels: monthSeries.labels, datasets: [
+        { label: 'Revenue ₹', data: monthSeries.revenue, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.10)', yAxisID: 'y', tension: .3, fill: true },
+        { label: 'Orders', data: monthSeries.orders, borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,.10)', yAxisID: 'y1', tension: .3 }
+      ] },
+      options: { responsive: true, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { font: { weight: 'bold' } } } }, scales: { y: { beginAtZero: true }, y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } } } }
+    });
+
+    const mix = this.productMix();
+    const mixEmpty = document.getElementById('productMixEmpty');
+    const mixCanvas = document.getElementById('productMixChart');
+    if (!mix.labels.length) {
+      mixEmpty.classList.remove('hidden');
+      mixCanvas.classList.add('hidden');
+    } else {
+      mixEmpty.classList.add('hidden');
+      mixCanvas.classList.remove('hidden');
+      this.charts.mix = new Chart(mixCanvas, {
+        type: 'doughnut',
+        data: { labels: mix.labels, datasets: [{ data: mix.kg, backgroundColor: ['#f97316','#8b5cf6','#10b981','#ef4444','#06b6d4','#eab308','#ec4899','#64748b'] }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold' } } } } }
+      });
+    }
+  }
+
+  chartOptions(label) {
+    return {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { labels: { font: { weight: 'bold' } } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.formattedValue}` } } },
+      scales: { y: { beginAtZero: true, title: { display: true, text: label } }, x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } } }
+    };
+  }
+
+  getLastDays(count) {
+    const labels = [];
+    const revenue = [];
+    const profit = [];
+    const expense = [];
+    const today = new Date();
+    for (let i = count - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      labels.push(d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
+      const orders = this.state.orders.filter(o => new Date(o.date).toISOString().slice(0, 10) === key);
+      revenue.push(orders.reduce((s, o) => s + Number(o.total || 0), 0));
+      profit.push(orders.reduce((s, o) => s + Number(o.profit || 0), 0));
+      expense.push(orders.reduce((s, o) => s + Number(o.expense || 0), 0));
+    }
+    return { labels, revenue, profit, expense };
+  }
+
+  getLastMonths(count) {
+    const labels = [];
+    const revenue = [];
+    const ordersCount = [];
+    const now = new Date();
+    for (let i = count - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const orders = this.state.orders.filter(o => this.monthKey(o.date) === key);
+      labels.push(d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }));
+      revenue.push(orders.reduce((s, o) => s + Number(o.total || 0), 0));
+      ordersCount.push(orders.length);
+    }
+    return { labels, revenue, orders: ordersCount };
+  }
+
+  productMix() {
+    const map = new Map();
+    this.state.orders.forEach(o => {
+      const key = o.productName || 'Unknown Product';
+      map.set(key, (map.get(key) || 0) + Number(o.kg || 0));
+    });
+    const rows = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+    return { labels: rows.map(r => r[0]), kg: rows.map(r => Number(r[1].toFixed(2))) };
+  }
+
+  renderReports() {
+    const monthly = this.groupBy(this.state.orders, o => this.monthKey(o.date));
+    const monthlyRows = Object.keys(monthly).sort().reverse().map(key => this.reportRow(key, monthly[key]));
+    document.getElementById('monthlyReportBody').innerHTML = monthlyRows.join('') || `<tr><td colspan="6" class="p-6 text-center text-slate-500 font-bold">No monthly data yet.</td></tr>`;
+
+    const yearly = this.groupBy(this.state.orders, o => String(new Date(o.date).getFullYear()));
+    const yearlyRows = Object.keys(yearly).sort().reverse().map(key => this.reportRow(key, yearly[key]));
+    document.getElementById('yearlyReportBody').innerHTML = yearlyRows.join('') || `<tr><td colspan="6" class="p-6 text-center text-slate-500 font-bold">No yearly data yet.</td></tr>`;
+  }
+
+  groupBy(items, fn) {
+    return items.reduce((acc, item) => {
+      const key = fn(item);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+  }
+
+  reportRow(label, orders) {
+    const kg = orders.reduce((s, o) => s + Number(o.kg || 0), 0);
+    const revenue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
+    const expense = orders.reduce((s, o) => s + Number(o.expense || 0), 0);
+    const profit = orders.reduce((s, o) => s + Number(o.profit || 0), 0);
+    return `<tr class="border-b border-slate-100 hover:bg-amber-50/40"><td class="p-4 font-black">${label}</td><td class="p-4 font-bold">${orders.length}</td><td class="p-4 font-bold">${this.formatKg(kg)}</td><td class="p-4 font-bold text-green-700">${this.formatCurrency(revenue)}</td><td class="p-4 font-bold text-rose-700">${this.formatCurrency(expense)}</td><td class="p-4 font-bold text-emerald-700">${this.formatCurrency(profit)}</td></tr>`;
+  }
+
+  downloadBackup() {
+    const payload = {
+      version: 3,
+      app: 'Cake & Take Sales Manager',
+      exportedAt: new Date().toISOString(),
+      products: this.state.products,
+      orders: this.state.orders,
+      customers: this.state.customers,
+      totals: {
+        revenue: this.state.orders.reduce((s, o) => s + Number(o.total || 0), 0),
+        expense: this.state.orders.reduce((s, o) => s + Number(o.expense || 0), 0),
+        profit: this.state.orders.reduce((s, o) => s + Number(o.profit || 0), 0)
+      }
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cake-take-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    this.notify('Backup downloaded ✅');
+  }
+
+  importBackup() {
+    const file = document.getElementById('backupFile').files[0];
+    if (!file) {
+      this.notify('Please choose a JSON backup file.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        const migrated = this.migrateData(data);
+        if (!confirm('Import backup now? Current browser data will be replaced.')) return;
+        this.state = migrated;
+        this.resetProductForm();
+        this.resetOrderForm();
+        this.saveData(false);
+        this.renderAll();
+        this.notify('Backup imported successfully ✅');
+      } catch (error) {
+        console.error(error);
+        this.notify('Invalid JSON backup file.', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  clearData() {
+    if (!confirm('Reset all products, orders, customers, and reports? This cannot be undone unless you have a backup.')) return;
+    this.state = { products: [], orders: [], customers: [] };
+    localStorage.removeItem(STORAGE_KEY);
+    this.resetProductForm();
+    this.resetOrderForm();
+    this.renderAll();
+    this.notify('All data reset.');
+  }
+
+  emptyState(title, subtitle) {
+    return `<div class="md:col-span-2 xl:col-span-3 rounded-3xl border-2 border-dashed border-slate-200 bg-white/70 p-10 text-center"><div class="text-4xl mb-3">🧁</div><div class="text-xl font-black text-slate-700">${title}</div><div class="text-slate-500 font-semibold mt-2">${subtitle}</div></div>`;
+  }
+
+  notify(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `fixed top-5 right-5 max-w-sm z-50 rounded-2xl px-5 py-4 shadow-2xl text-white font-black no-print ${type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => toast.classList.add('hidden'), 3000);
+  }
+
+  escape(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
+  }
+}
+
+const app = new CakeTakeManager();
+</script>
+</body>
+</html>
