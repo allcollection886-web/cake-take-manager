@@ -19,11 +19,36 @@
     .card-hover:hover { transform: translateY(-2px); box-shadow: 0 18px 35px rgba(15, 23, 42, .12); }
     .scrollbar-thin::-webkit-scrollbar { height: 8px; width: 8px; }
     .scrollbar-thin::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 999px; }
+    body.app-locked { overflow: hidden; }
+    body.app-locked #mainApp { filter: blur(4px); pointer-events: none; user-select: none; }
+    #appLockScreen.hidden { display: none !important; }
     @media print { .no-print { display:none !important; } body { background:white !important; } .print-card { box-shadow:none !important; border:1px solid #ddd !important; } }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 text-slate-800">
-  <div class="max-w-7xl mx-auto p-4 md:p-6">
+<body class="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 text-slate-800 app-locked">
+  <div id="appLockScreen" class="fixed inset-0 z-[9999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="w-full max-w-md rounded-[2rem] bg-white shadow-2xl border border-amber-200 p-6 md:p-8">
+      <div class="text-center mb-6">
+        <div class="mx-auto h-16 w-16 rounded-3xl bg-gradient-to-br from-amber-400 to-orange-600 text-white flex items-center justify-center text-3xl shadow-xl">🔐</div>
+        <h2 id="lockTitle" class="text-3xl font-black text-slate-900 mt-4">App Password</h2>
+        <p id="lockSubtitle" class="text-sm font-bold text-slate-500 mt-2">Password is stored as a hash in this browser, not written in the page source.</p>
+      </div>
+      <form id="lockSetupForm" class="space-y-4 hidden">
+        <input id="setupPassword" type="password" class="w-full p-4 border-2 border-slate-200 rounded-2xl text-lg" placeholder="Create password" autocomplete="new-password" />
+        <input id="setupPasswordConfirm" type="password" class="w-full p-4 border-2 border-slate-200 rounded-2xl text-lg" placeholder="Confirm password" autocomplete="new-password" />
+        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-4 rounded-2xl text-lg font-black shadow-xl">Set Password & Unlock</button>
+      </form>
+      <form id="lockLoginForm" class="space-y-4 hidden">
+        <input id="loginPassword" type="password" class="w-full p-4 border-2 border-slate-200 rounded-2xl text-lg" placeholder="Enter password" autocomplete="current-password" />
+        <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 rounded-2xl text-lg font-black shadow-xl">Unlock App</button>
+      </form>
+      <div id="lockError" class="hidden mt-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm font-bold p-4"></div>
+      <div class="mt-5 rounded-2xl bg-amber-50 border border-amber-100 p-4 text-xs text-amber-900 font-semibold leading-relaxed">
+        Note: this protects your browser data from casual access. A public GitHub Pages app cannot fully hide client-side code; real code protection needs private repo or server-side authentication.
+      </div>
+    </div>
+  </div>
+  <div id="mainApp" class="max-w-7xl mx-auto p-4 md:p-6">
     <header class="glass rounded-[2rem] border border-amber-200 shadow-2xl p-5 md:p-7 mb-6">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
         <div class="flex items-center gap-4">
@@ -31,11 +56,11 @@
           <div>
             <p class="text-sm font-black tracking-[0.25em] text-orange-500 uppercase">Cake & Take</p>
             <h1 class="text-3xl md:text-5xl font-black bg-gradient-to-r from-amber-600 via-orange-500 to-rose-500 bg-clip-text text-transparent">Sales Manager</h1>
-            <p class="text-sm md:text-base text-amber-800 font-semibold mt-2">Orders • Kg-based pricing • Profit & expense • Reports • JSON backup/import</p>
+            <p class="text-sm md:text-base text-amber-800 font-semibold mt-2">Orders • Kg & piece-wise sales • Profit & expense • CSV/Sheets export • Backup/import</p>
           </div>
         </div>
         <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900 max-w-md">
-          <strong>GitHub Pages mode:</strong> data is saved in this browser using localStorage. Use Backup Export + Import to restore data if the browser resets.
+          <strong>GitHub Pages mode:</strong> data is saved in this browser. The app now has a browser password lock; use Backup Export + Import to restore data if the browser resets.
         </div>
       </div>
     </header>
@@ -123,7 +148,7 @@
           <div id="topProducts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
         <div class="glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
-          <h2 class="text-2xl font-black mb-5">⚖️ Product Kg Share</h2>
+          <h2 class="text-2xl font-black mb-5">📊 Product Sales Share</h2>
           <div id="productMixEmpty" class="hidden text-center text-slate-500 py-16">No product sales yet.</div>
           <canvas id="productMixChart" height="190"></canvas>
         </div>
@@ -157,15 +182,35 @@
             <input id="customerPhone" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" placeholder="9876543210" />
           </div>
           <div>
-            <label class="block text-sm font-black text-slate-700 mb-2">🥧 Product *</label>
-            <select id="orderProduct" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg">
-              <option value="">Add product first...</option>
+            <label class="block text-sm font-black text-slate-700 mb-2">🥧 Kg-wise Product (optional)</label>
+            <select id="orderProduct" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg">
+              <option value="">No kg product / manual order</option>
+            </select>
+            <p class="mt-2 text-xs font-bold text-slate-500">Select only for kg-based products added on Products page.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">🧁 Manual Item / Piece Product</label>
+            <input id="manualProductName" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" placeholder="Tea cake pieces, round cake pieces" />
+            <p class="mt-2 text-xs font-bold text-slate-500">Use this when product is sold by quantity/piece.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">🔢 Manual Unit</label>
+            <select id="manualUnitType" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg">
+              <option value="piece">piece</option>
+              <option value="pack">pack</option>
+              <option value="item">item</option>
+              <option value="box">box</option>
             </select>
           </div>
           <div>
             <label class="block text-sm font-black text-slate-700 mb-2">🧮 Quantity / Count *</label>
             <input id="orderKg" type="number" min="1" step="1" value="1" required class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" />
-            <p class="mt-2 text-xs font-bold text-slate-500">Example: 1 means one selected item/pack. Kg and price come from the product.</p>
+            <p class="mt-2 text-xs font-bold text-slate-500">For kg product: number of selected items. For manual product: number of pieces/items.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-black text-slate-700 mb-2">💰 Manual Unit Price ₹</label>
+            <input id="manualUnitPrice" type="number" min="0" step="1" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" placeholder="Price per piece/item" />
+            <p class="mt-2 text-xs font-bold text-slate-500">Required only if no kg product is selected.</p>
           </div>
           <div>
             <label class="block text-sm font-black text-slate-700 mb-2">🧾 Expense ₹</label>
@@ -173,7 +218,7 @@
           </div>
           <div>
             <label class="block text-sm font-black text-slate-700 mb-2">📈 Profit ₹</label>
-            <input id="orderProfit" type="number" step="1" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="Enter profit manually" />
+            <input id="orderProfit" type="number" step="1" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-400 text-lg" placeholder="Auto: total - expense" />
           </div>
           <div>
             <label class="block text-sm font-black text-slate-700 mb-2">💳 Payment Status</label>
@@ -186,7 +231,7 @@
             <label class="block text-sm font-black text-slate-700 mb-2">📅 Order Date</label>
             <input id="orderDate" type="datetime-local" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-400 text-lg" />
           </div>
-          <div id="orderPreview" class="hidden"></div>
+          <div id="orderPreview" class="hidden xl:col-span-3 rounded-2xl bg-amber-50 border border-amber-100 p-4 text-sm font-bold text-amber-900"></div>
           <div class="xl:col-span-3">
             <button id="orderSubmitButton" type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-5 px-8 rounded-2xl text-xl font-black shadow-xl hover:from-amber-600 hover:to-orange-700 transition-all">➕ Create Order Now</button>
           </div>
@@ -274,15 +319,20 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
             <h2 class="text-3xl font-black">📊 Monthly Report</h2>
-            <p class="text-slate-500 font-semibold mt-1">Revenue, expense, profit, orders, and kg sold grouped month-wise.</p>
+            <p class="text-slate-500 font-semibold mt-1">Revenue, expense, profit, orders, kg sold, and piece/item quantity grouped month-wise.</p>
           </div>
-          <button onclick="window.print()" class="no-print px-5 py-3 rounded-2xl bg-slate-900 text-white font-black hover:bg-slate-700">🖨️ Print / Save PDF</button>
+          <div class="no-print flex flex-wrap gap-2">
+            <button id="exportOrdersCsvBtn" type="button" class="px-4 py-3 rounded-2xl bg-slate-900 text-white font-black hover:bg-slate-700">⬇️ Orders CSV</button>
+            <button id="exportMonthlyCsvBtn" type="button" class="px-4 py-3 rounded-2xl bg-emerald-600 text-white font-black hover:bg-emerald-700">⬇️ Monthly CSV</button>
+            <button id="exportYearlyCsvBtn" type="button" class="px-4 py-3 rounded-2xl bg-blue-600 text-white font-black hover:bg-blue-700">⬇️ Yearly CSV</button>
+            <button id="openGoogleSheetsBtn" type="button" class="px-4 py-3 rounded-2xl bg-white border-2 border-green-200 text-green-700 font-black hover:bg-green-50">📗 Open Google Sheets</button>
+          </div>
         </div>
         <div class="overflow-x-auto scrollbar-thin">
-          <table class="w-full text-left min-w-[760px]">
+          <table class="w-full text-left min-w-[920px]">
             <thead class="bg-amber-50 text-amber-900">
               <tr>
-                <th class="p-4 rounded-l-2xl">Month</th><th class="p-4">Orders</th><th class="p-4">Kg Sold</th><th class="p-4">Revenue</th><th class="p-4">Expense</th><th class="p-4 rounded-r-2xl">Profit</th>
+                <th class="p-4 rounded-l-2xl">Month</th><th class="p-4">Orders</th><th class="p-4">Kg Sold</th><th class="p-4">Qty / Pieces</th><th class="p-4">Revenue</th><th class="p-4">Expense</th><th class="p-4 rounded-r-2xl">Profit</th>
               </tr>
             </thead>
             <tbody id="monthlyReportBody"></tbody>
@@ -292,10 +342,10 @@
       <div class="glass p-5 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
         <h2 class="text-3xl font-black mb-6">🗓️ Yearly Report</h2>
         <div class="overflow-x-auto scrollbar-thin">
-          <table class="w-full text-left min-w-[760px]">
+          <table class="w-full text-left min-w-[920px]">
             <thead class="bg-orange-50 text-orange-900">
               <tr>
-                <th class="p-4 rounded-l-2xl">Year</th><th class="p-4">Orders</th><th class="p-4">Kg Sold</th><th class="p-4">Revenue</th><th class="p-4">Expense</th><th class="p-4 rounded-r-2xl">Profit</th>
+                <th class="p-4 rounded-l-2xl">Year</th><th class="p-4">Orders</th><th class="p-4">Kg Sold</th><th class="p-4">Qty / Pieces</th><th class="p-4">Revenue</th><th class="p-4">Expense</th><th class="p-4 rounded-r-2xl">Profit</th>
               </tr>
             </thead>
             <tbody id="yearlyReportBody"></tbody>
@@ -305,7 +355,7 @@
     </section>
 
     <section id="backup" class="tab-content">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="glass p-6 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
           <h2 class="text-3xl font-black mb-4">💾 Export Backup</h2>
           <p class="text-slate-600 font-semibold mb-6">Download your products, orders, customers, profit, expenses, and report data as one JSON file.</p>
@@ -321,6 +371,15 @@
           <button id="importBackupBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-5 rounded-2xl text-xl font-black shadow-xl hover:from-emerald-600 hover:to-teal-700">Import Backup</button>
           <button id="clearDataBtn" class="w-full mt-4 bg-white border-2 border-red-200 text-red-600 py-4 rounded-2xl text-lg font-black hover:bg-red-50">Reset All Data</button>
         </div>
+        <div class="glass p-6 md:p-8 rounded-3xl shadow-xl border border-slate-200 print-card">
+          <h2 class="text-3xl font-black mb-4">🔐 App Password Lock</h2>
+          <p class="text-slate-600 font-semibold mb-6">Set or change the browser password. The password itself is not written in view source.</p>
+          <button id="changePasswordBtn" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-5 rounded-2xl text-xl font-black shadow-xl hover:from-amber-600 hover:to-orange-700">Change Password</button>
+          <button id="lockNowBtn" class="w-full mt-4 bg-white border-2 border-slate-200 text-slate-700 py-4 rounded-2xl text-lg font-black hover:bg-slate-50">Lock Now</button>
+          <div class="mt-5 rounded-2xl bg-amber-50 border border-amber-100 p-4 text-amber-900 text-sm">
+            For full public GitHub code protection, use private repo or server-side authentication. This lock protects only the app in this browser.
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -329,6 +388,8 @@
 
 <script>
 const STORAGE_KEY = 'cake_take_manager_v2';
+const LOCK_KEY = 'cake_take_manager_lock_v1';
+const LOCK_SESSION_KEY = 'cake_take_manager_unlocked';
 
 class CakeTakeManager {
   constructor() {
@@ -340,6 +401,7 @@ class CakeTakeManager {
   }
 
   init() {
+    this.initSecurityGate();
     this.loadData();
     this.bindEvents();
     this.setDefaultOrderDate();
@@ -363,7 +425,7 @@ class CakeTakeManager {
       this.addOrUpdateOrder();
     });
     document.getElementById('cancelOrderEdit').addEventListener('click', () => this.resetOrderForm());
-    ['orderProduct', 'orderKg', 'orderExpense', 'orderProfit'].forEach(id => {
+    ['orderProduct', 'manualProductName', 'manualUnitType', 'manualUnitPrice', 'orderKg', 'orderExpense', 'orderProfit'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => this.updateOrderPreview());
       document.getElementById(id).addEventListener('change', () => this.updateOrderPreview());
     });
@@ -383,6 +445,165 @@ class CakeTakeManager {
     document.getElementById('downloadBackupBtn').addEventListener('click', () => this.downloadBackup());
     document.getElementById('importBackupBtn').addEventListener('click', () => this.importBackup());
     document.getElementById('clearDataBtn').addEventListener('click', () => this.clearData());
+    document.getElementById('exportOrdersCsvBtn').addEventListener('click', () => this.exportOrdersCsv());
+    document.getElementById('exportMonthlyCsvBtn').addEventListener('click', () => this.exportGroupedCsv('monthly'));
+    document.getElementById('exportYearlyCsvBtn').addEventListener('click', () => this.exportGroupedCsv('yearly'));
+    document.getElementById('openGoogleSheetsBtn').addEventListener('click', () => this.openGoogleSheets());
+    document.getElementById('changePasswordBtn').addEventListener('click', () => this.changePassword());
+    document.getElementById('lockNowBtn').addEventListener('click', () => this.lockNow());
+  }
+
+  initSecurityGate() {
+    const setupForm = document.getElementById('lockSetupForm');
+    const loginForm = document.getElementById('lockLoginForm');
+    setupForm.addEventListener('submit', e => {
+      e.preventDefault();
+      this.setupPassword();
+    });
+    loginForm.addEventListener('submit', e => {
+      e.preventDefault();
+      this.unlockWithPassword();
+    });
+
+    const config = this.getLockConfig();
+    if (!config) {
+      this.showLockMode('setup');
+      return;
+    }
+    if (sessionStorage.getItem(LOCK_SESSION_KEY) === 'yes') {
+      this.unlockApp(false);
+      return;
+    }
+    this.showLockMode('login');
+  }
+
+  getLockConfig() {
+    try {
+      return JSON.parse(localStorage.getItem(LOCK_KEY) || 'null');
+    } catch (error) {
+      return null;
+    }
+  }
+
+  showLockMode(mode) {
+    document.body.classList.add('app-locked');
+    document.getElementById('appLockScreen').classList.remove('hidden');
+    document.getElementById('lockError').classList.add('hidden');
+    document.getElementById('lockSetupForm').classList.toggle('hidden', mode !== 'setup');
+    document.getElementById('lockLoginForm').classList.toggle('hidden', mode !== 'login');
+    document.getElementById('lockTitle').textContent = mode === 'setup' ? 'Create App Password' : 'Enter App Password';
+    document.getElementById('lockSubtitle').textContent = mode === 'setup'
+      ? 'First time setup. The password is hashed in this browser and is not visible in view source.'
+      : 'Unlock Cake & Take Sales Manager.';
+    setTimeout(() => {
+      const input = document.getElementById(mode === 'setup' ? 'setupPassword' : 'loginPassword');
+      input?.focus();
+    }, 50);
+  }
+
+  unlockApp(showToast = true) {
+    sessionStorage.setItem(LOCK_SESSION_KEY, 'yes');
+    document.body.classList.remove('app-locked');
+    document.getElementById('appLockScreen').classList.add('hidden');
+    if (showToast) this.notify('App unlocked ✅');
+  }
+
+  lockNow() {
+    sessionStorage.removeItem(LOCK_SESSION_KEY);
+    if (!this.getLockConfig()) this.showLockMode('setup');
+    else this.showLockMode('login');
+  }
+
+  showLockError(message) {
+    const box = document.getElementById('lockError');
+    box.textContent = message;
+    box.classList.remove('hidden');
+  }
+
+  randomSalt() {
+    if (window.crypto?.getRandomValues) {
+      const bytes = new Uint8Array(16);
+      crypto.getRandomValues(bytes);
+      return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    }
+    return String(Date.now()) + Math.random().toString(16).slice(2);
+  }
+
+  async passwordHash(password, salt) {
+    if (window.crypto?.subtle && window.TextEncoder) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: encoder.encode(salt), iterations: 120000, hash: 'SHA-256' }, keyMaterial, 256);
+      return Array.from(new Uint8Array(bits), b => b.toString(16).padStart(2, '0')).join('');
+    }
+    let hash = 2166136261;
+    const input = password + '|' + salt;
+    for (let round = 0; round < 2000; round++) {
+      for (let i = 0; i < input.length; i++) {
+        hash ^= input.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      hash ^= round;
+    }
+    return String(hash >>> 0);
+  }
+
+  async setupPassword() {
+    const password = document.getElementById('setupPassword').value;
+    const confirmPassword = document.getElementById('setupPasswordConfirm').value;
+    if (password.length < 4) {
+      this.showLockError('Use at least 4 characters.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      this.showLockError('Password confirmation does not match.');
+      return;
+    }
+    const salt = this.randomSalt();
+    const hash = await this.passwordHash(password, salt);
+    localStorage.setItem(LOCK_KEY, JSON.stringify({ version: 1, salt, hash, createdAt: new Date().toISOString() }));
+    document.getElementById('setupPassword').value = '';
+    document.getElementById('setupPasswordConfirm').value = '';
+    this.unlockApp();
+  }
+
+  async unlockWithPassword() {
+    const config = this.getLockConfig();
+    if (!config) {
+      this.showLockMode('setup');
+      return;
+    }
+    const password = document.getElementById('loginPassword').value;
+    const hash = await this.passwordHash(password, config.salt);
+    if (hash !== config.hash) {
+      this.showLockError('Wrong password. Please try again.');
+      return;
+    }
+    document.getElementById('loginPassword').value = '';
+    this.unlockApp();
+  }
+
+  async changePassword() {
+    const config = this.getLockConfig();
+    if (config) {
+      const oldPassword = prompt('Enter current password:');
+      if (oldPassword === null) return;
+      const oldHash = await this.passwordHash(oldPassword, config.salt);
+      if (oldHash !== config.hash) {
+        this.notify('Current password is wrong.', 'error');
+        return;
+      }
+    }
+    const newPassword = prompt('Enter new password (minimum 4 characters):');
+    if (newPassword === null) return;
+    if (newPassword.length < 4) {
+      this.notify('Use at least 4 characters.', 'error');
+      return;
+    }
+    const salt = this.randomSalt();
+    const hash = await this.passwordHash(newPassword, salt);
+    localStorage.setItem(LOCK_KEY, JSON.stringify({ version: 1, salt, hash, updatedAt: new Date().toISOString() }));
+    this.notify('Password changed ✅');
   }
 
   showTab(tabName) {
@@ -407,7 +628,7 @@ class CakeTakeManager {
 
   saveData(showToast = true) {
     const payload = {
-      version: 3,
+      version: 4,
       savedAt: new Date().toISOString(),
       products: this.state.products,
       orders: this.state.orders,
@@ -440,21 +661,24 @@ class CakeTakeManager {
     const rawOrders = Array.isArray(data.orders) ? data.orders : [];
     const orders = rawOrders.map(o => {
       const product = productById.get(String(o.productId));
-      const hasStoredQuantity = o.quantity !== undefined || o.count !== undefined || o.qty !== undefined;
-      const quantity = Number(o.quantity ?? o.count ?? o.qty ?? o.kg ?? 1) || 1;
-      const productBaseKg = Number(o.productBaseKg ?? product?.baseKg ?? 1) || 1;
-      const productBasePrice = Number(o.productBasePrice ?? o.unitPrice ?? product?.basePrice ?? o.basePrice ?? 0) || 0;
-      const kg = hasStoredQuantity ? (Number(o.kg ?? (productBaseKg * quantity)) || productBaseKg * quantity) : productBaseKg * quantity;
-      const unitPrice = productBasePrice || Number(o.pricePerKg ?? 0) || 0;
-      const total = hasStoredQuantity && o.total !== undefined ? (Number(o.total) || 0) : Math.round(unitPrice * quantity);
+      const quantity = Number(o.quantity ?? o.count ?? o.qty ?? 1) || 1;
+      const storedType = o.productType || o.saleType || (o.productId || product ? 'kg' : 'quantity');
+      const isKgOrder = storedType === 'kg' && (product || Number(o.productBaseKg ?? o.kg ?? 0) > 0);
+      const productBaseKg = isKgOrder ? (Number(o.productBaseKg ?? product?.baseKg ?? 1) || 1) : 0;
+      const unitPrice = Number(o.unitPrice ?? o.productBasePrice ?? product?.basePrice ?? o.basePrice ?? o.manualUnitPrice ?? 0) || 0;
+      const kg = isKgOrder ? Number(o.kg ?? (productBaseKg * quantity)) || productBaseKg * quantity : 0;
+      const total = Number(o.total ?? Math.round(unitPrice * quantity)) || 0;
       const expense = Number(o.expense ?? 0) || 0;
       const profit = Number(o.profit ?? (total - expense)) || 0;
+      const productName = String(o.productName || product?.name || o.manualProductName || 'Manual Item').trim();
       return {
         id: Number(o.id) || Date.now() + Math.random(),
         customerName: String(o.customerName || o.name || 'Walk-in Customer').trim(),
         customerPhone: String(o.customerPhone || o.phone || '').trim(),
-        productId: Number(o.productId) || null,
-        productName: String(o.productName || product?.name || 'Unknown Product').trim(),
+        productId: isKgOrder ? (Number(o.productId) || product?.id || null) : null,
+        productType: isKgOrder ? 'kg' : 'quantity',
+        unitType: String(o.unitType || o.manualUnitType || (isKgOrder ? 'item' : 'piece')).trim(),
+        productName,
         productBaseKg,
         productBasePrice: unitPrice,
         quantity,
@@ -484,6 +708,13 @@ class CakeTakeManager {
 
   formatKg(value) {
     return `${Number(value || 0).toFixed(2).replace(/\.00$/, '')} kg`;
+  }
+
+  formatQty(value, unit = 'piece') {
+    const qty = Number(value || 0);
+    const clean = qty.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    const label = unit || 'piece';
+    return `${clean} ${label}${qty === 1 ? '' : 's'}`;
   }
 
   formatDate(value) {
@@ -635,10 +866,10 @@ class CakeTakeManager {
   updateProductDropdown() {
     const select = document.getElementById('orderProduct');
     if (!this.state.products.length) {
-      select.innerHTML = '<option value="">Add product first...</option>';
+      select.innerHTML = '<option value="">No kg product / manual order</option>';
       return;
     }
-    select.innerHTML = '<option value="">Select Product</option>' + this.state.products
+    select.innerHTML = '<option value="">No kg product / manual order</option>' + this.state.products
       .map(p => `<option value="${p.id}">${this.escape(p.name)} - ${this.formatKg(p.baseKg || 1)} = ${this.formatCurrency(p.basePrice || 0)}</option>`)
       .join('');
   }
@@ -647,41 +878,73 @@ class CakeTakeManager {
     const customerName = document.getElementById('customerName').value.trim();
     const customerPhone = document.getElementById('customerPhone').value.trim();
     const productId = Number(document.getElementById('orderProduct').value);
+    const manualProductName = document.getElementById('manualProductName').value.trim();
+    const unitType = document.getElementById('manualUnitType').value || 'piece';
+    const manualUnitPrice = Number(document.getElementById('manualUnitPrice').value || 0);
     const quantity = Number(document.getElementById('orderKg').value);
     const paymentStatus = document.getElementById('paymentStatus').value;
     const expense = Number(document.getElementById('orderExpense').value || 0);
     const profitInput = document.getElementById('orderProfit').value;
     const product = this.state.products.find(p => p.id === productId);
 
-    if (!customerName || !customerPhone || !product || !quantity || quantity <= 0) {
-      this.notify('Please fill customer, product, and valid quantity/count.', 'error');
+    if (!customerName || !customerPhone || !quantity || quantity <= 0) {
+      this.notify('Please fill customer, phone, and valid quantity/count.', 'error');
       return;
     }
 
-    const productBaseKg = Number(product.baseKg || 1);
-    const productBasePrice = Number(product.basePrice || 0);
-    const kg = Number((productBaseKg * quantity).toFixed(3));
-    const total = Math.round(productBasePrice * quantity);
-    const profit = profitInput === '' ? total - expense : Number(profitInput);
+    let orderPayload;
+    if (product) {
+      const productBaseKg = Number(product.baseKg || 1);
+      const productBasePrice = Number(product.basePrice || 0);
+      const kg = Number((productBaseKg * quantity).toFixed(3));
+      const total = Math.round(productBasePrice * quantity);
+      const profit = profitInput === '' ? total - expense : Number(profitInput);
+      orderPayload = {
+        productId,
+        productType: 'kg',
+        unitType: 'item',
+        productName: product.name,
+        productBaseKg,
+        productBasePrice,
+        quantity,
+        kg,
+        unitPrice: productBasePrice,
+        total,
+        expense,
+        profit: Number.isFinite(profit) ? profit : total - expense
+      };
+    } else {
+      if (!manualProductName || !manualUnitPrice || manualUnitPrice <= 0) {
+        this.notify('For piece/quantity orders, enter manual item name and unit price.', 'error');
+        return;
+      }
+      const total = Math.round(manualUnitPrice * quantity);
+      const profit = profitInput === '' ? total - expense : Number(profitInput);
+      orderPayload = {
+        productId: null,
+        productType: 'quantity',
+        unitType,
+        productName: manualProductName,
+        productBaseKg: 0,
+        productBasePrice: manualUnitPrice,
+        quantity,
+        kg: 0,
+        unitPrice: manualUnitPrice,
+        total,
+        expense,
+        profit: Number.isFinite(profit) ? profit : total - expense
+      };
+    }
+
     const localDate = document.getElementById('orderDate').value;
     const date = localDate ? new Date(localDate).toISOString() : new Date().toISOString();
-
-    const orderPayload = {
+    orderPayload = {
       customerName,
       customerPhone,
-      productId,
-      productName: product.name,
-      productBaseKg,
-      productBasePrice,
-      quantity,
-      kg,
-      unitPrice: productBasePrice,
-      total,
-      expense,
-      profit: Number.isFinite(profit) ? profit : total - expense,
       paymentStatus,
       date,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      ...orderPayload
     };
 
     if (this.editingOrderId) {
@@ -706,7 +969,10 @@ class CakeTakeManager {
     this.showTab('orders');
     document.getElementById('customerName').value = order.customerName;
     document.getElementById('customerPhone').value = order.customerPhone;
-    document.getElementById('orderProduct').value = order.productId || '';
+    document.getElementById('orderProduct').value = order.productType === 'kg' ? (order.productId || '') : '';
+    document.getElementById('manualProductName').value = order.productType === 'quantity' ? (order.productName || '') : '';
+    document.getElementById('manualUnitType').value = order.unitType || 'piece';
+    document.getElementById('manualUnitPrice').value = order.productType === 'quantity' ? (order.unitPrice || order.productBasePrice || '') : '';
     document.getElementById('orderKg').value = order.quantity || 1;
     document.getElementById('orderExpense').value = order.expense || 0;
     document.getElementById('orderProfit').value = order.profit || '';
@@ -728,6 +994,8 @@ class CakeTakeManager {
     document.getElementById('orderForm').reset();
     document.getElementById('orderKg').value = 1;
     document.getElementById('orderExpense').value = 0;
+    document.getElementById('manualUnitType').value = 'piece';
+    document.getElementById('manualUnitPrice').value = '';
     document.getElementById('orderFormTitle').textContent = '➕ New Order';
     document.getElementById('orderSubmitButton').textContent = '➕ Create Order Now';
     document.getElementById('cancelOrderEdit').classList.add('hidden');
@@ -745,7 +1013,35 @@ class CakeTakeManager {
 
   updateOrderPreview() {
     const box = document.getElementById('orderPreview');
-    if (box) box.innerHTML = '';
+    if (!box) return;
+    const productId = Number(document.getElementById('orderProduct').value);
+    const product = this.state.products.find(p => p.id === productId);
+    const quantity = Number(document.getElementById('orderKg').value) || 0;
+    const expense = Number(document.getElementById('orderExpense').value || 0);
+    const profitInput = document.getElementById('orderProfit').value;
+    const manualName = document.getElementById('manualProductName').value.trim();
+    const unitType = document.getElementById('manualUnitType').value || 'piece';
+    const manualUnitPrice = Number(document.getElementById('manualUnitPrice').value || 0);
+
+    if (product && quantity > 0) {
+      const total = Math.round(Number(product.basePrice || 0) * quantity);
+      const kg = Number((Number(product.baseKg || 0) * quantity).toFixed(3));
+      const profit = profitInput === '' ? total - expense : Number(profitInput);
+      box.innerHTML = `Preview: <span class="font-black">${this.escape(product.name)}</span> • ${this.formatKg(product.baseKg)} × ${quantity} = ${this.formatKg(kg)} • Total ${this.formatCurrency(total)} • Profit ${this.formatCurrency(Number.isFinite(profit) ? profit : total - expense)}`;
+      box.classList.remove('hidden');
+      return;
+    }
+
+    if (manualName && quantity > 0 && manualUnitPrice > 0) {
+      const total = Math.round(manualUnitPrice * quantity);
+      const profit = profitInput === '' ? total - expense : Number(profitInput);
+      box.innerHTML = `Preview: <span class="font-black">${this.escape(manualName)}</span> • ${this.formatQty(quantity, unitType)} × ${this.formatCurrency(manualUnitPrice)} = ${this.formatCurrency(total)} • Profit ${this.formatCurrency(Number.isFinite(profit) ? profit : total - expense)}`;
+      box.classList.remove('hidden');
+      return;
+    }
+
+    box.classList.add('hidden');
+    box.innerHTML = '';
   }
 
   renderOrders() {
@@ -765,7 +1061,7 @@ class CakeTakeManager {
               <span class="px-3 py-1 rounded-full text-xs font-black ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${order.paymentStatus === 'paid' ? '✅ Paid' : '⏳ Pending'}</span>
             </div>
             <div class="text-sm text-slate-500 font-semibold">📱 ${this.escape(order.customerPhone)} • 📅 ${this.formatDate(order.date)}</div>
-            <div class="text-sm text-slate-600 font-semibold mt-1">🥧 ${this.escape(order.productName)} • ${this.formatKg(order.productBaseKg || 1)} × ${order.quantity || 1} = ${this.formatKg(order.kg)} • Price ${this.formatCurrency(order.unitPrice || order.productBasePrice || 0)}</div>
+            <div class="text-sm text-slate-600 font-semibold mt-1">${order.productType === 'kg' ? `🥧 ${this.escape(order.productName)} • ${this.formatKg(order.productBaseKg || 1)} × ${order.quantity || 1} = ${this.formatKg(order.kg)} • Price ${this.formatCurrency(order.unitPrice || order.productBasePrice || 0)}` : `🧁 ${this.escape(order.productName)} • ${this.formatQty(order.quantity || 1, order.unitType || 'piece')} • Unit price ${this.formatCurrency(order.unitPrice || order.productBasePrice || 0)}`}</div>
           </div>
           <div class="grid grid-cols-3 gap-3 text-center min-w-[280px]">
             <div class="rounded-2xl bg-amber-50 p-3"><div class="text-xs font-bold text-slate-500">Total</div><div class="font-black text-amber-700">${this.formatCurrency(order.total)}</div></div>
@@ -871,24 +1167,26 @@ class CakeTakeManager {
     const map = new Map();
     this.state.orders.forEach(o => {
       const key = o.productName || `Product ${o.productId}`;
-      if (!map.has(key)) map.set(key, { name: key, kg: 0, revenue: 0, profit: 0, orders: 0 });
+      if (!map.has(key)) map.set(key, { name: key, kg: 0, qty: 0, revenue: 0, profit: 0, orders: 0, unitType: o.unitType || 'piece' });
       const item = map.get(key);
       item.kg += Number(o.kg || 0);
+      if (o.productType !== 'kg') item.qty += Number(o.quantity || 0);
       item.revenue += Number(o.total || 0);
       item.profit += Number(o.profit || 0);
       item.orders += 1;
+      item.unitType = o.unitType || item.unitType;
     });
-    const top = Array.from(map.values()).sort((a, b) => b.kg - a.kg).slice(0, 6);
+    const top = Array.from(map.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 6);
     if (!top.length) {
-      container.innerHTML = this.emptyState('No top products yet', 'Top products will show only after product sales are recorded.');
+      container.innerHTML = this.emptyState('No top products yet', 'Top products will show only after sales are recorded.');
       return;
     }
     container.innerHTML = top.map((p, index) => `
       <div class="p-5 bg-gradient-to-br from-purple-50 to-pink-50 rounded-3xl shadow-lg border border-purple-100 text-center">
         <div class="text-3xl mb-2">${index === 0 ? '🏆' : '🥧'}</div>
         <div class="font-black text-lg mb-2">${this.escape(p.name)}</div>
-        <div class="text-2xl font-black text-purple-700">${this.formatKg(p.kg)}</div>
-        <div class="text-sm font-bold text-slate-500 mt-1">${p.orders} orders • ${this.formatCurrency(p.revenue)}</div>
+        <div class="text-2xl font-black text-purple-700">${this.formatCurrency(p.revenue)}</div>
+        <div class="text-sm font-bold text-slate-500 mt-1">${p.orders} orders • ${p.kg > 0 ? this.formatKg(p.kg) : this.formatQty(p.qty, p.unitType)}</div>
       </div>`).join('');
   }
 
@@ -910,6 +1208,7 @@ class CakeTakeManager {
     return `
       <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Orders</div><div class="text-2xl font-black">${orders.length}</div></div>
       <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Kg</div><div class="text-2xl font-black">${this.formatKg(kg)}</div></div>
+      <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Qty/Pieces</div><div class="text-2xl font-black">${orders.filter(o => o.productType !== 'kg').reduce((s, o) => s + Number(o.quantity || 0), 0)}</div></div>
       <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Revenue</div><div class="text-2xl font-black text-green-700">${this.formatCurrency(revenue)}</div></div>
       <div class="rounded-2xl bg-white/80 border border-slate-100 p-4"><div class="text-xs font-bold text-slate-500">Profit</div><div class="text-2xl font-black text-emerald-700">${this.formatCurrency(profit)}</div></div>`;
   }
@@ -956,7 +1255,7 @@ class CakeTakeManager {
       mixCanvas.classList.remove('hidden');
       this.charts.mix = new Chart(mixCanvas, {
         type: 'doughnut',
-        data: { labels: mix.labels, datasets: [{ data: mix.kg, backgroundColor: ['#f97316','#8b5cf6','#10b981','#ef4444','#06b6d4','#eab308','#ec4899','#64748b'] }] },
+        data: { labels: mix.labels, datasets: [{ data: mix.sales, backgroundColor: ['#f97316','#8b5cf6','#10b981','#ef4444','#06b6d4','#eab308','#ec4899','#64748b'] }] },
         options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold' } } } } }
       });
     }
@@ -1010,20 +1309,20 @@ class CakeTakeManager {
     const map = new Map();
     this.state.orders.forEach(o => {
       const key = o.productName || 'Unknown Product';
-      map.set(key, (map.get(key) || 0) + Number(o.kg || 0));
+      map.set(key, (map.get(key) || 0) + Number(o.total || 0));
     });
-    const rows = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
-    return { labels: rows.map(r => r[0]), kg: rows.map(r => Number(r[1].toFixed(2))) };
+    const rows = Array.from(map.entries()).filter(r => r[1] > 0).sort((a, b) => b[1] - a[1]);
+    return { labels: rows.map(r => r[0]), sales: rows.map(r => Number(r[1].toFixed(2))) };
   }
 
   renderReports() {
     const monthly = this.groupBy(this.state.orders, o => this.monthKey(o.date));
     const monthlyRows = Object.keys(monthly).sort().reverse().map(key => this.reportRow(key, monthly[key]));
-    document.getElementById('monthlyReportBody').innerHTML = monthlyRows.join('') || `<tr><td colspan="6" class="p-6 text-center text-slate-500 font-bold">No monthly data yet.</td></tr>`;
+    document.getElementById('monthlyReportBody').innerHTML = monthlyRows.join('') || `<tr><td colspan="7" class="p-6 text-center text-slate-500 font-bold">No monthly data yet.</td></tr>`;
 
     const yearly = this.groupBy(this.state.orders, o => String(new Date(o.date).getFullYear()));
     const yearlyRows = Object.keys(yearly).sort().reverse().map(key => this.reportRow(key, yearly[key]));
-    document.getElementById('yearlyReportBody').innerHTML = yearlyRows.join('') || `<tr><td colspan="6" class="p-6 text-center text-slate-500 font-bold">No yearly data yet.</td></tr>`;
+    document.getElementById('yearlyReportBody').innerHTML = yearlyRows.join('') || `<tr><td colspan="7" class="p-6 text-center text-slate-500 font-bold">No yearly data yet.</td></tr>`;
   }
 
   groupBy(items, fn) {
@@ -1037,15 +1336,16 @@ class CakeTakeManager {
 
   reportRow(label, orders) {
     const kg = orders.reduce((s, o) => s + Number(o.kg || 0), 0);
+    const qty = orders.filter(o => o.productType !== 'kg').reduce((s, o) => s + Number(o.quantity || 0), 0);
     const revenue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
     const expense = orders.reduce((s, o) => s + Number(o.expense || 0), 0);
     const profit = orders.reduce((s, o) => s + Number(o.profit || 0), 0);
-    return `<tr class="border-b border-slate-100 hover:bg-amber-50/40"><td class="p-4 font-black">${label}</td><td class="p-4 font-bold">${orders.length}</td><td class="p-4 font-bold">${this.formatKg(kg)}</td><td class="p-4 font-bold text-green-700">${this.formatCurrency(revenue)}</td><td class="p-4 font-bold text-rose-700">${this.formatCurrency(expense)}</td><td class="p-4 font-bold text-emerald-700">${this.formatCurrency(profit)}</td></tr>`;
+    return `<tr class="border-b border-slate-100 hover:bg-amber-50/40"><td class="p-4 font-black">${label}</td><td class="p-4 font-bold">${orders.length}</td><td class="p-4 font-bold">${this.formatKg(kg)}</td><td class="p-4 font-bold">${qty}</td><td class="p-4 font-bold text-green-700">${this.formatCurrency(revenue)}</td><td class="p-4 font-bold text-rose-700">${this.formatCurrency(expense)}</td><td class="p-4 font-bold text-emerald-700">${this.formatCurrency(profit)}</td></tr>`;
   }
 
   downloadBackup() {
     const payload = {
-      version: 3,
+      version: 4,
       app: 'Cake & Take Sales Manager',
       exportedAt: new Date().toISOString(),
       products: this.state.products,
@@ -1067,6 +1367,69 @@ class CakeTakeManager {
     a.remove();
     URL.revokeObjectURL(url);
     this.notify('Backup downloaded ✅');
+  }
+
+  csvEscape(value) {
+    const text = String(value ?? '');
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  }
+
+  downloadCsv(filename, rows) {
+    if (!rows.length) {
+      this.notify('No data to export.', 'error');
+      return;
+    }
+    const csv = rows.map(row => row.map(value => this.csvEscape(value)).join(',')).join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    this.notify('CSV exported ✅');
+  }
+
+  exportOrdersCsv() {
+    const rows = [[
+      'Date', 'Customer Name', 'Phone', 'Product', 'Sale Type', 'Unit Type', 'Quantity', 'Kg Sold', 'Unit Price', 'Revenue', 'Expense', 'Profit', 'Payment Status'
+    ]];
+    this.state.orders.forEach(o => rows.push([
+      this.formatDate(o.date), o.customerName, o.customerPhone, o.productName, o.productType === 'kg' ? 'Kg-wise' : 'Quantity/Piece', o.unitType || '', o.quantity || 0, o.kg || 0, o.unitPrice || o.productBasePrice || 0, o.total || 0, o.expense || 0, o.profit || 0, o.paymentStatus
+    ]));
+    this.downloadCsv(`cake-take-orders-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  }
+
+  groupedReportRows(type) {
+    const grouped = type === 'monthly'
+      ? this.groupBy(this.state.orders, o => this.monthKey(o.date))
+      : this.groupBy(this.state.orders, o => String(new Date(o.date).getFullYear()));
+    const rows = [[type === 'monthly' ? 'Month' : 'Year', 'Orders', 'Kg Sold', 'Qty / Pieces', 'Revenue', 'Expense', 'Profit']];
+    Object.keys(grouped).sort().reverse().forEach(label => {
+      const orders = grouped[label];
+      rows.push([
+        label,
+        orders.length,
+        orders.reduce((s, o) => s + Number(o.kg || 0), 0),
+        orders.filter(o => o.productType !== 'kg').reduce((s, o) => s + Number(o.quantity || 0), 0),
+        orders.reduce((s, o) => s + Number(o.total || 0), 0),
+        orders.reduce((s, o) => s + Number(o.expense || 0), 0),
+        orders.reduce((s, o) => s + Number(o.profit || 0), 0)
+      ]);
+    });
+    return rows;
+  }
+
+  exportGroupedCsv(type) {
+    const rows = this.groupedReportRows(type);
+    this.downloadCsv(`cake-take-${type}-report-${new Date().toISOString().slice(0,10)}.csv`, rows);
+  }
+
+  openGoogleSheets() {
+    window.open('https://sheets.new', '_blank', 'noopener,noreferrer');
+    this.notify('Google Sheets opened. Import the downloaded CSV there.');
   }
 
   importBackup() {
