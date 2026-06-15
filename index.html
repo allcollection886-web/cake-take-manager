@@ -77,6 +77,27 @@
     </nav>
 
     <section id="dashboard" class="tab-content active">
+      <div class="glass rounded-3xl shadow-xl border border-amber-200 p-5 md:p-6 mb-6 print-card">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+          <div>
+            <p class="text-sm font-black tracking-[0.18em] text-orange-500 uppercase">Dashboard Filter</p>
+            <h2 id="dashboardPeriodTitle" class="text-2xl md:text-3xl font-black text-slate-900 mt-1">Current Month</h2>
+            <p class="text-sm font-semibold text-slate-500 mt-2">Dashboard totals, charts, top products, and payment status will show only the selected month.</p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto no-print">
+            <div>
+              <label class="block text-xs font-black text-slate-600 mb-2">Year</label>
+              <select id="dashboardYearFilter" class="w-full sm:w-44 p-4 border-2 border-amber-200 rounded-2xl bg-white font-black text-slate-800 focus:ring-4 focus:ring-amber-200 focus:border-amber-400"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-black text-slate-600 mb-2">Month</label>
+              <select id="dashboardMonthFilter" class="w-full sm:w-56 p-4 border-2 border-amber-200 rounded-2xl bg-white font-black text-slate-800 focus:ring-4 focus:ring-amber-200 focus:border-amber-400"></select>
+            </div>
+            <button id="dashboardCurrentMonthBtn" type="button" class="self-end px-5 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 text-white font-black shadow-lg hover:from-amber-600 hover:to-orange-700">Current Month</button>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-4 mb-6">
         <div class="glass p-5 rounded-3xl shadow-xl border border-blue-100 card-hover">
           <div class="text-blue-600 font-black">📦 Total Orders</div>
@@ -86,27 +107,27 @@
         <div class="glass p-5 rounded-3xl shadow-xl border border-green-100 card-hover">
           <div class="text-green-600 font-black">💰 Revenue</div>
           <div id="totalRevenue" class="text-4xl font-black text-green-950 mt-3">₹0</div>
-          <div class="text-sm text-green-600 mt-1">all orders</div>
+          <div id="revenueScopeLabel" class="text-sm text-green-600 mt-1">selected month</div>
         </div>
         <div class="glass p-5 rounded-3xl shadow-xl border border-rose-100 card-hover">
           <div class="text-rose-600 font-black">🧾 Expense</div>
           <div id="totalExpense" class="text-4xl font-black text-rose-950 mt-3">₹0</div>
-          <div class="text-sm text-rose-600 mt-1">manual input</div>
+          <div id="expenseScopeLabel" class="text-sm text-rose-600 mt-1">selected month</div>
         </div>
         <div class="glass p-5 rounded-3xl shadow-xl border border-emerald-100 card-hover">
           <div class="text-emerald-600 font-black">📈 Profit</div>
           <div id="totalProfit" class="text-4xl font-black text-emerald-950 mt-3">₹0</div>
-          <div class="text-sm text-emerald-600 mt-1">profit - expense</div>
+          <div id="profitScopeLabel" class="text-sm text-emerald-600 mt-1">selected month</div>
         </div>
         <div class="glass p-5 rounded-3xl shadow-xl border border-purple-100 card-hover">
           <div class="text-purple-600 font-black">👥 Customers</div>
           <div id="totalCustomers" class="text-4xl font-black text-purple-950 mt-3">0</div>
-          <div class="text-sm text-purple-600 mt-1">unique customers</div>
+          <div id="customersScopeLabel" class="text-sm text-purple-600 mt-1">selected month</div>
         </div>
         <div class="glass p-5 rounded-3xl shadow-xl border border-orange-100 card-hover">
           <div class="text-orange-600 font-black">⚖️ Kg Sold</div>
           <div id="totalKg" class="text-4xl font-black text-orange-950 mt-3">0</div>
-          <div class="text-sm text-orange-600 mt-1">total weight</div>
+          <div id="kgScopeLabel" class="text-sm text-orange-600 mt-1">selected month</div>
         </div>
       </div>
 
@@ -114,7 +135,7 @@
         <div class="xl:col-span-2 glass p-5 md:p-7 rounded-3xl shadow-xl border border-slate-100 print-card">
           <div class="flex items-center justify-between gap-3 mb-5">
             <h2 class="text-2xl font-black">📈 Sales Growth</h2>
-            <span class="text-xs font-bold px-3 py-2 bg-blue-50 text-blue-700 rounded-full">Last 30 days</span>
+            <span id="salesGrowthScopeLabel" class="text-xs font-bold px-3 py-2 bg-blue-50 text-blue-700 rounded-full">Selected month</span>
           </div>
           <canvas id="salesGrowthChart" height="120"></canvas>
         </div>
@@ -156,11 +177,11 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="glass p-6 rounded-3xl shadow-xl border border-amber-100 print-card">
-          <h2 class="text-2xl font-black mb-4">📅 This Month Report</h2>
+          <h2 id="monthReportTitle" class="text-2xl font-black mb-4">📅 Selected Month Report</h2>
           <div id="monthSummary" class="grid grid-cols-2 gap-3"></div>
         </div>
         <div class="glass p-6 rounded-3xl shadow-xl border border-orange-100 print-card">
-          <h2 class="text-2xl font-black mb-4">🗓️ This Year Report</h2>
+          <h2 id="yearReportTitle" class="text-2xl font-black mb-4">🗓️ Selected Year Report</h2>
           <div id="yearSummary" class="grid grid-cols-2 gap-3"></div>
         </div>
       </div>
@@ -397,6 +418,9 @@ class CakeTakeManager {
     this.editingProductId = null;
     this.editingOrderId = null;
     this.charts = {};
+    const now = new Date();
+    this.dashboardYear = now.getFullYear();
+    this.dashboardMonth = now.getMonth() + 1;
     this.init();
   }
 
@@ -451,6 +475,22 @@ class CakeTakeManager {
     document.getElementById('openGoogleSheetsBtn').addEventListener('click', () => this.openGoogleSheets());
     document.getElementById('changePasswordBtn').addEventListener('click', () => this.changePassword());
     document.getElementById('lockNowBtn').addEventListener('click', () => this.lockNow());
+
+    document.getElementById('dashboardYearFilter').addEventListener('change', e => {
+      this.dashboardYear = Number(e.target.value) || new Date().getFullYear();
+      this.dashboardMonth = this.validDashboardMonth(this.dashboardYear, this.dashboardMonth);
+      this.renderDashboard();
+    });
+    document.getElementById('dashboardMonthFilter').addEventListener('change', e => {
+      this.dashboardMonth = Number(e.target.value) || (new Date().getMonth() + 1);
+      this.renderDashboard();
+    });
+    document.getElementById('dashboardCurrentMonthBtn').addEventListener('click', () => {
+      const now = new Date();
+      this.dashboardYear = now.getFullYear();
+      this.dashboardMonth = now.getMonth() + 1;
+      this.renderDashboard();
+    });
   }
 
   initSecurityGate() {
@@ -1140,32 +1180,135 @@ class CakeTakeManager {
       </div>`).join('');
   }
 
+  dashboardYearOptions() {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const years = [];
+    const addYear = year => {
+      const y = Number(year);
+      if (Number.isFinite(y) && !years.includes(y)) years.push(y);
+    };
+
+    for (let y = currentYear; y >= 2024; y--) addYear(y);
+    for (let y = currentYear + 1; y <= currentYear + 5; y++) addYear(y);
+    this.state.orders.forEach(order => {
+      const d = new Date(order.date);
+      if (!Number.isNaN(d.getTime())) addYear(d.getFullYear());
+    });
+
+    return years;
+  }
+
+  dashboardMonthOptions(year) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const maxMonth = Number(year) === currentYear ? currentMonth : 12;
+    const months = [];
+    for (let month = maxMonth; month >= 1; month--) months.push(month);
+    return months;
+  }
+
+  validDashboardMonth(year, month) {
+    const months = this.dashboardMonthOptions(year);
+    const selected = Number(month);
+    return months.includes(selected) ? selected : months[0];
+  }
+
+  monthName(year, month) {
+    return new Date(Number(year), Number(month) - 1, 1).toLocaleDateString('en-IN', { month: 'long' });
+  }
+
+  dashboardPeriodLabel() {
+    return `${this.monthName(this.dashboardYear, this.dashboardMonth)} ${this.dashboardYear}`;
+  }
+
+  renderDashboardFilters() {
+    const yearSelect = document.getElementById('dashboardYearFilter');
+    const monthSelect = document.getElementById('dashboardMonthFilter');
+    if (!yearSelect || !monthSelect) return;
+
+    const years = this.dashboardYearOptions();
+    if (!years.includes(Number(this.dashboardYear))) this.dashboardYear = new Date().getFullYear();
+    this.dashboardMonth = this.validDashboardMonth(this.dashboardYear, this.dashboardMonth);
+
+    yearSelect.innerHTML = years
+      .map(year => `<option value="${year}">${year}</option>`)
+      .join('');
+    yearSelect.value = String(this.dashboardYear);
+
+    const months = this.dashboardMonthOptions(this.dashboardYear);
+    monthSelect.innerHTML = months
+      .map(month => `<option value="${month}">${this.monthName(this.dashboardYear, month)} ${this.dashboardYear}</option>`)
+      .join('');
+    monthSelect.value = String(this.dashboardMonth);
+
+    const title = document.getElementById('dashboardPeriodTitle');
+    if (title) title.textContent = `${this.dashboardPeriodLabel()} Dashboard`;
+  }
+
+  getDashboardMonthOrders() {
+    const key = `${this.dashboardYear}-${String(this.dashboardMonth).padStart(2, '0')}`;
+    return this.state.orders.filter(order => this.monthKey(order.date) === key);
+  }
+
+  getDashboardYearOrders() {
+    return this.state.orders.filter(order => {
+      const d = new Date(order.date);
+      return !Number.isNaN(d.getTime()) && d.getFullYear() === Number(this.dashboardYear);
+    });
+  }
+
+  uniqueCustomerCount(orders) {
+    const customers = new Set();
+    orders.forEach(order => {
+      const key = (order.customerPhone || order.customerName || '').toString().trim().toLowerCase();
+      if (key) customers.add(key);
+    });
+    return customers.size;
+  }
+
+  dateKey(value) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
   renderDashboard() {
-    const orders = this.state.orders;
+    this.renderDashboardFilters();
+
+    const orders = this.getDashboardMonthOrders();
+    const yearOrders = this.getDashboardYearOrders();
+    const periodLabel = this.dashboardPeriodLabel();
     const totalRevenue = orders.reduce((s, o) => s + Number(o.total || 0), 0);
     const totalExpense = orders.reduce((s, o) => s + Number(o.expense || 0), 0);
     const totalProfit = orders.reduce((s, o) => s + Number(o.profit || 0), 0);
     const totalKg = orders.reduce((s, o) => s + Number(o.kg || 0), 0);
-    const today = new Date().toDateString();
-    const ordersToday = orders.filter(o => new Date(o.date).toDateString() === today).length;
+
     document.getElementById('totalOrders').textContent = orders.length;
-    document.getElementById('ordersToday').textContent = `${ordersToday} today`;
+    document.getElementById('ordersToday').textContent = periodLabel;
     document.getElementById('totalRevenue').textContent = this.formatCurrency(totalRevenue);
     document.getElementById('totalExpense').textContent = this.formatCurrency(totalExpense);
     document.getElementById('totalProfit').textContent = this.formatCurrency(totalProfit);
-    document.getElementById('totalCustomers').textContent = this.customerSummaries().length;
+    document.getElementById('totalCustomers').textContent = this.uniqueCustomerCount(orders);
     document.getElementById('totalKg').textContent = this.formatKg(totalKg).replace(' kg', '');
     document.getElementById('paidCount').textContent = orders.filter(o => o.paymentStatus === 'paid').length;
     document.getElementById('pendingCount').textContent = orders.filter(o => o.paymentStatus !== 'paid').length;
-    this.renderTopProducts();
-    this.renderSummaryCards();
+
+    ['revenueScopeLabel', 'expenseScopeLabel', 'profitScopeLabel', 'customersScopeLabel', 'kgScopeLabel', 'salesGrowthScopeLabel'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = periodLabel;
+    });
+
+    this.renderTopProducts(orders);
+    this.renderSummaryCards(orders, yearOrders);
     this.renderCharts();
   }
 
-  renderTopProducts() {
+  renderTopProducts(orders = this.state.orders) {
     const container = document.getElementById('topProducts');
     const map = new Map();
-    this.state.orders.forEach(o => {
+    orders.forEach(o => {
       const key = o.productName || `Product ${o.productId}`;
       if (!map.has(key)) map.set(key, { name: key, kg: 0, qty: 0, revenue: 0, profit: 0, orders: 0, unitType: o.unitType || 'piece' });
       const item = map.get(key);
@@ -1178,7 +1321,7 @@ class CakeTakeManager {
     });
     const top = Array.from(map.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 6);
     if (!top.length) {
-      container.innerHTML = this.emptyState('No top products yet', 'Top products will show only after sales are recorded.');
+      container.innerHTML = this.emptyState('No top products for this month', `No product sales are recorded for ${this.dashboardPeriodLabel()}. Change the dashboard filter to another month if needed.`);
       return;
     }
     container.innerHTML = top.map((p, index) => `
@@ -1190,12 +1333,12 @@ class CakeTakeManager {
       </div>`).join('');
   }
 
-  renderSummaryCards() {
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const currentYear = String(now.getFullYear());
-    const monthOrders = this.state.orders.filter(o => this.monthKey(o.date) === currentMonth);
-    const yearOrders = this.state.orders.filter(o => String(new Date(o.date).getFullYear()) === currentYear);
+  renderSummaryCards(monthOrders = this.getDashboardMonthOrders(), yearOrders = this.getDashboardYearOrders()) {
+    const monthTitle = document.getElementById('monthReportTitle');
+    const yearTitle = document.getElementById('yearReportTitle');
+    if (monthTitle) monthTitle.textContent = `📅 ${this.dashboardPeriodLabel()} Report`;
+    if (yearTitle) yearTitle.textContent = `🗓️ ${this.dashboardYear} Year Report`;
+
     document.getElementById('monthSummary').innerHTML = this.summaryHtml(monthOrders);
     document.getElementById('yearSummary').innerHTML = this.summaryHtml(yearOrders);
   }
@@ -1218,7 +1361,7 @@ class CakeTakeManager {
     Object.values(this.charts).forEach(chart => chart.destroy());
     this.charts = {};
 
-    const daySeries = this.getLastDays(30);
+    const daySeries = this.getSelectedMonthDailySeries();
     this.charts.sales = new Chart(document.getElementById('salesGrowthChart'), {
       type: 'line',
       data: { labels: daySeries.labels, datasets: [{ label: 'Revenue ₹', data: daySeries.revenue, borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,.12)', tension: .35, fill: true, pointRadius: 2 }] },
@@ -1234,7 +1377,7 @@ class CakeTakeManager {
       options: this.chartOptions('Amount')
     });
 
-    const monthSeries = this.getLastMonths(12);
+    const monthSeries = this.getSelectedYearMonthSeries();
     this.charts.history = new Chart(document.getElementById('historyChart'), {
       type: 'line',
       data: { labels: monthSeries.labels, datasets: [
@@ -1244,7 +1387,7 @@ class CakeTakeManager {
       options: { responsive: true, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { font: { weight: 'bold' } } } }, scales: { y: { beginAtZero: true }, y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } } } }
     });
 
-    const mix = this.productMix();
+    const mix = this.productMix(this.getDashboardMonthOrders());
     const mixEmpty = document.getElementById('productMixEmpty');
     const mixCanvas = document.getElementById('productMixChart');
     if (!mix.labels.length) {
@@ -1270,18 +1413,23 @@ class CakeTakeManager {
     };
   }
 
-  getLastDays(count) {
+  getSelectedMonthDailySeries() {
     const labels = [];
     const revenue = [];
     const profit = [];
     const expense = [];
+    const year = Number(this.dashboardYear);
+    const month = Number(this.dashboardMonth);
     const today = new Date();
-    for (let i = count - 1; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
+    const isCurrentMonth = year === today.getFullYear() && month === today.getMonth() + 1;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const maxDay = isCurrentMonth ? today.getDate() : daysInMonth;
+
+    for (let day = 1; day <= maxDay; day++) {
+      const key = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const d = new Date(year, month - 1, day);
       labels.push(d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }));
-      const orders = this.state.orders.filter(o => new Date(o.date).toISOString().slice(0, 10) === key);
+      const orders = this.state.orders.filter(o => this.dateKey(o.date) === key);
       revenue.push(orders.reduce((s, o) => s + Number(o.total || 0), 0));
       profit.push(orders.reduce((s, o) => s + Number(o.profit || 0), 0));
       expense.push(orders.reduce((s, o) => s + Number(o.expense || 0), 0));
@@ -1289,25 +1437,27 @@ class CakeTakeManager {
     return { labels, revenue, profit, expense };
   }
 
-  getLastMonths(count) {
+  getSelectedYearMonthSeries() {
     const labels = [];
     const revenue = [];
     const ordersCount = [];
+    const year = Number(this.dashboardYear);
     const now = new Date();
-    for (let i = count - 1; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const maxMonth = year === now.getFullYear() ? now.getMonth() + 1 : 12;
+
+    for (let month = 1; month <= maxMonth; month++) {
+      const key = `${year}-${String(month).padStart(2, '0')}`;
       const orders = this.state.orders.filter(o => this.monthKey(o.date) === key);
-      labels.push(d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }));
+      labels.push(new Date(year, month - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' }));
       revenue.push(orders.reduce((s, o) => s + Number(o.total || 0), 0));
       ordersCount.push(orders.length);
     }
     return { labels, revenue, orders: ordersCount };
   }
 
-  productMix() {
+  productMix(orders = this.state.orders) {
     const map = new Map();
-    this.state.orders.forEach(o => {
+    orders.forEach(o => {
       const key = o.productName || 'Unknown Product';
       map.set(key, (map.get(key) || 0) + Number(o.total || 0));
     });
